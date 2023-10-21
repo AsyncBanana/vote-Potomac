@@ -1,0 +1,145 @@
+---
+import richText from "../modules/richText?url";
+
+export interface Props {
+	id?: string;
+	value?: string;
+	autocomplete?: string;
+	placeholder?: string;
+	description?: string;
+	maxlength?: number;
+	minlength?: number;
+	required?: boolean;
+	resize?: boolean;
+	title?: string;
+	rows?: number;
+	cols: number;
+	shadow?: boolean;
+	markdown?: boolean;
+	class?: string;
+}
+const {
+	id = "textbox",
+	value = "",
+	autocomplete = "",
+	placeholder = "",
+	description = undefined,
+	required = false,
+	maxlength,
+	minlength,
+	title,
+	resize = false,
+	rows = 2,
+	cols,
+	shadow = true,
+	markdown = false,
+	class: className = "",
+} = Astro.props;
+import Button from "./Button.svelte";
+const outerClasses = `rounded-md b-1 b-neutral flex flex-col ${
+	shadow ? "!shadow-md " : ""
+}`;
+const sharedClasses = `px-6 py-3`;
+const inputClasses = `textarea rounded-t-none`;
+---
+
+{
+	markdown ? (
+		<>
+			<script data-textbox={id} src={richText} />
+			<label class="label" for={id}>
+				<div>
+					<slot />
+				</div>
+				{description ? (
+					<p class="text-gray-500 text-sm ml-2">{description}</p>
+				) : (
+					""
+				)}
+			</label>
+			<div class={outerClasses}>
+				<div class="rounded-t-md flex b-b-1 b-neutral bg-base-200">
+					<Button
+						type="borderless"
+						class="bold !rounded-b-none !rounded-r-none ring-primary"
+						action="button"
+						title="Bold"
+						square
+						id="boldButton"
+					>
+						B
+					</Button>
+					<Button
+						type="borderless"
+						class="italic !rounded-none"
+						action="button"
+						title="Italic"
+						square
+						id="italicButton"
+					>
+						I
+					</Button>
+					<Button
+						type="borderless"
+						class="underline !rounded-none"
+						action="button"
+						title="Underline"
+						square
+						id="underlineButton"
+					>
+						U
+					</Button>
+					<Button
+						type="borderless"
+						class="line-through !rounded-none"
+						action="button"
+						title="Strikethrough"
+						square
+						id="strikethroughButton"
+					>
+						S
+					</Button>
+					<Button
+						type="borderless"
+						action="button"
+						class="!rounded-b-none !rounded-l-none ml-auto"
+						id="previewButton"
+					>
+						Preview
+					</Button>
+				</div>
+				<div class={`${sharedClasses} rounded-b-md hidden`} id="preview" />
+				<textarea
+					{autocomplete}
+					{placeholder}
+					{required}
+					{maxlength}
+					{minlength}
+					{title}
+					{rows}
+					{id}
+					{value}
+					class={`${inputClasses} ${resize ? "" : "resize-none "}${className}`}
+				/>
+			</div>
+		</>
+	) : (
+		<label class="flex flex-col">
+			<div class="ml-2 text-lg font-500">
+				<slot />
+			</div>
+			{description && <p class="text-gray-500 text-sm ml-2">{description}</p>}
+			<textarea
+				{autocomplete}
+				{placeholder}
+				{required}
+				{maxlength}
+				{minlength}
+				{title}
+				{rows}
+				{cols}
+				class={`${resize ? "" : "resize-none "}${outerClasses}${className}`}
+			/>
+		</label>
+	)
+}

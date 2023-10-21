@@ -1,0 +1,35 @@
+{
+	"name": "vote_potomac",
+	"type": "module",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "astro dev",
+		"start": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"format": "prettier -w ."
+	},
+	"dependencies": {
+		"@astrojs/cloudflare": "^7.5.4",
+		"@astrojs/svelte": "^4.0.3",
+		"@astrojs/tailwind": "^5.0.2",
+		"@libsql/client": "^0.3.5",
+		"astro": "^3.3.2",
+		"drizzle-orm": "^0.28.6",
+		"snarkdown": "^2.0.0",
+		"solid-js": "^1.8.3",
+		"svelte": "^4.2.1",
+		"tailwindcss": "^3.3.3"
+	},
+	"devDependencies": {
+		"@iconify/json": "^2.2.130",
+		"@unocss/extractor-svelte": "^0.56.5",
+		"@unocss/reset": "^0.56.5",
+		"daisyui": "^3.9.3",
+		"prettier": "^3.0.3",
+		"prettier-plugin-astro": "^0.12.0",
+		"unocss": "^0.56.5",
+		"unocss-preset-daisy": "^6.0.1"
+	}
+}

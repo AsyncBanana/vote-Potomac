@@ -1,0 +1,38 @@
+---
+import Button from "../../components/Button.svelte";
+import Suggestion from "../../components/Suggestion.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+const id = "135315039";
+export const prerender = false;
+---
+
+<BaseLayout class="w-main">
+	<header class="flex flex-row gap-3 grow items-stretch">
+		<Button type="tertiary" class="h-auto" icon="i-bx:upvote" vertical>
+			4
+		</Button><div>
+			<h1 class="text-3xl font-bold text-balance">
+				Create a student run GenAI working group
+			</h1>
+			<div class="text-sm text-neutral-content font-medium">
+				Created 9/13/2023
+			</div>
+		</div>
+	</header>
+	<main class="text-lg leading-loose">
+		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+		tempor incididunt ut labore et dolore magna aliqua. Aliquam id diam maecenas
+		ultricies mi eget. Urna id volutpat lacus laoreet non curabitur gravida.
+		Pellentesque eu tincidunt tortor aliquam nulla facilisi. Sagittis eu
+		volutpat odio facilisis mauris sit amet. Ut etiam sit amet nisl purus in
+		mollis. Vel facilisis volutpat est velit egestas dui id.
+	</main>
+	<h1 class="text-2xl font-bold mt-6">More suggestions</h1>
+	<div>
+		<Suggestion
+			title="Introduce a breakfast option at school"
+			votes={1}
+			id="135315039"
+		/>
+	</div>
+</BaseLayout>
