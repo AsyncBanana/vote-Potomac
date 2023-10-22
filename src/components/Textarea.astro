@@ -3,6 +3,7 @@ import richText from "../modules/richText?url";
 
 export interface Props {
 	id?: string;
+	name?: string;
 	value?: string;
 	autocomplete?: string;
 	placeholder?: string;
@@ -13,13 +14,14 @@ export interface Props {
 	resize?: boolean;
 	title?: string;
 	rows?: number;
-	cols: number;
+	cols?: number;
 	shadow?: boolean;
 	markdown?: boolean;
 	class?: string;
 }
 const {
 	id = "textbox",
+	name,
 	value = "",
 	autocomplete = "",
 	placeholder = "",
@@ -118,6 +120,7 @@ const inputClasses = `textarea rounded-t-none`;
 					{title}
 					{rows}
 					{id}
+					{name}
 					{value}
 					class={`${inputClasses} ${resize ? "" : "resize-none "}${className}`}
 				/>
