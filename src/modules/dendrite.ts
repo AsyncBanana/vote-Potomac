@@ -8,3 +8,7 @@ export function generateDendrite(timestamp?: number) {
 		.padStart(20, "0");
 	return parseInt(dendrite, 2);
 }
+export function extractDendrite(dendrite: number) {
+	const strDendrite = dendrite.toString(2);
+	strDendrite.substring(0, 31);
+}

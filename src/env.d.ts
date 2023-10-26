@@ -14,7 +14,6 @@ declare namespace App {
 interface ImportMetaEnv {
 	readonly DATABASE_URL: string;
 	readonly DATABASE_TOKEN?: string;
-	readonly AUTH_SECRET: string;
 	readonly CLOUDFLARE_ACCOUNT_ID: string;
 	readonly MIN_TITLE_LENGTH: number;
 	readonly MAX_TITLE_LENGTH: number;

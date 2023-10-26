@@ -41,4 +41,5 @@ export const POST: APIRoute = async (ctx) => {
 			},
 		);
 	}
+	ctx.locals.db.();
 };

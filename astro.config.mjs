@@ -6,18 +6,31 @@ import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-  integrations: [unocss({
-    extractors: [extractorSvelte()],
-    injectReset: true
-  }), svelte()],
-  vite: {
-    resolve: {
-      alias: [{
-        find: "@libsql/client",
-        replacement: import.meta.env.PROD ? "@libsql/client/web" : "@libsql/client"
-      }]
-    }
-  },
-  output: "hybrid",
-  adapter: cloudflare()
+	integrations: [
+		unocss({
+			extractors: [extractorSvelte()],
+			injectReset: true,
+		}),
+		svelte(),
+	],
+	vite: {
+		resolve: {
+			alias: [
+				{
+					find: "@libsql/client",
+					replacement: import.meta.env.PROD
+						? "@libsql/client/web"
+						: "@libsql/client",
+				},
+			],
+		},
+	},
+	output: "hybrid",
+	adapter: cloudflare(),
+	image: {
+		service: {
+			config: {},
+			entrypoint: "astro/assets/services/noop",
+		},
+	},
 });

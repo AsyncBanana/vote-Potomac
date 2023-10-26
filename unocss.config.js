@@ -18,7 +18,9 @@ export default defineConfig({
 		},
 	},
 	presets: [
-		presetUno(),
+		presetUno({
+			dark: "media",
+		}),
 		presetIcons(),
 		presetWebFonts({
 			fonts: {
@@ -30,7 +32,6 @@ export default defineConfig({
 	transformers: [transformerDirectives()],
 	extractors: [extractSvelte()],
 	shortcuts: {
-		"w-main":
-			"w-full p-6 md:w-1/2 lg:w-1/3 xl:w-1/4 2xl:w-1/5 m-auto gap-3 flex flex-col",
+		"w-main": "w-full p-6 max-w-3xl m-auto gap-3 flex flex-col",
 	},
 });
