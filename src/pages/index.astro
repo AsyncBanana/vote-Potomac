@@ -2,24 +2,54 @@
 import Button from "../components/Button.svelte";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Suggestion from "../components/Suggestion.astro";
+import { verifyOAuthJWT } from "../modules/auth";
 export const prerender = false;
+const authData = Astro.cookies.get("authData")?.value;
+let session = authData && (await verifyOAuthJWT(authData));
 ---
 
-<BaseLayout class="w-main">
-	<div class="flex flex-row gap-3 place-items-center">
-		<h1 class="text-5xl font-bold text-center">Vote! Potomac</h1>
-		<Button type="tertiary" class="" href="/submit">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="32"
-				height="32"
-				viewBox="0 0 24 24"
-				><path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2v-6Z"
-				></path></svg
-			>New
-		</Button>
+<BaseLayout>
+	<div class="flex flex-col lg:flex-row lg:w-main place-content-center">
+		<h1 class="text-3xl lg:text-5xl font-bold text-center">Vote! Potomac</h1>
+		<div class="flex flex-row place-items-center lt-lg:m-auto">
+			<Button type="tertiary" class="" href="/submit">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="32"
+					height="32"
+					viewBox="0 0 24 24"
+					><path fill="currentColor" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2v-6Z"
+					></path></svg
+				>New
+			</Button>
+			{
+				session ? (
+					<details class="dropdown dropdown-end dropdown-bottom">
+						<summary class="m-1 btn btn-outline">Profile</summary>
+						<ul class="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box">
+							<li class="p-3 text-center font-bold">
+								{session.email.toUpperCase()}
+							</li>
+							<li>
+								<Button
+									href="/api/auth/signout"
+									type="borderless"
+									class="place-content-center"
+								>
+									Sign out
+								</Button>
+							</li>
+						</ul>
+					</details>
+				) : (
+					<Button type="tertiary" href="/api/auth/signin">
+						Sign in
+					</Button>
+				)
+			}
+		</div>
 	</div>
-	<div class="flex flex-col gap-6">
+	<div class="flex flex-col gap-6 w-main">
 		<Suggestion
 			title="Create a student run GenAI working group"
 			votes={4}

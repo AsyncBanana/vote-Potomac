@@ -2,6 +2,12 @@
 import Button from "../components/Button.svelte";
 import Textarea from "../components/Textarea.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { verifyOAuthJWT } from "../modules/auth";
+const authData = Astro.cookies.get("authData")?.value;
+const session = authData && (await verifyOAuthJWT(authData));
+if (!session) {
+	return Astro.locals.login("/submit");
+}
 ---
 
 <BaseLayout class="w-main">

@@ -1,9 +1,17 @@
 import type { APIRoute } from "astro";
+import { verifyOAuthJWT } from "../../modules/auth";
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async (ctx) => {
+	const authData = ctx.cookies.get("authData")?.value;
+	const session = authData && (await verifyOAuthJWT(authData));
+	if (!session) {
+		return new Response("Not signed in", {
+			status: 401,
+		});
+	}
 	let body: FormData;
 	try {
-		body = await request.formData();
+		body = await ctx.request.formData();
 	} catch {
 		return new Response("Invalid request body", {
 			status: 400,
