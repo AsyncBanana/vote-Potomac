@@ -1,11 +1,16 @@
 import type { APIRoute } from "astro";
 import { verifyOAuthJWT } from "../../modules/auth";
-
+import { SuggestionQueue } from "../../schemas/suggestion";
 export const POST: APIRoute = async (ctx) => {
 	const authData = ctx.cookies.get("authData")?.value;
 	const session = authData && (await verifyOAuthJWT(authData));
 	if (!session) {
 		return new Response("Not signed in", {
+			status: 401,
+		});
+	}
+	if (!session.email_verified) {
+		return new Response("Please verify your email", {
 			status: 401,
 		});
 	}
@@ -41,5 +46,9 @@ export const POST: APIRoute = async (ctx) => {
 			},
 		);
 	}
-	ctx.locals.db.();
+	ctx.locals.db.insert(SuggestionQueue).values({
+		title: title,
+		description: description,
+		author: session.email,
+	});
 };
