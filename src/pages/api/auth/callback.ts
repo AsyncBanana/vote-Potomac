@@ -1,6 +1,10 @@
 import type { APIRoute } from "astro";
-import { exchangeToken, verifyOAuthJWT } from "../../../modules/auth";
-
+import {
+	exchangeToken,
+	verifyOAuthJWT,
+	type OAuthToken,
+} from "../../../modules/auth";
+import { decode } from "@tsndr/cloudflare-worker-jwt";
 export const GET: APIRoute = async (ctx) => {
 	const code = ctx.url.searchParams.get("code");
 	if (!code) {
@@ -18,6 +22,7 @@ export const GET: APIRoute = async (ctx) => {
 	}
 
 	const res = await exchangeToken(code, ctx.url.origin + "/api/auth/callback");
+	const token = decode(res.id_token).payload as OAuthToken;
 	const decodedToken = await verifyOAuthJWT(res.id_token);
 	if (!decodedToken) {
 		return new Response("Invalid JWT", {
