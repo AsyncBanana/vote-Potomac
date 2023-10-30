@@ -10,30 +10,34 @@ export interface Props {
 	userData?: OAuthToken;
 	minimumRole?: UserRole;
 }
+export async function AppHandler(props: Props): Promise<Response | void> {
+	const { class: className, minimumRole = 0 } = props;
+	let { userRole, userData } = props;
+	if (userData === undefined) {
+		const authData = Astro.cookies.get("authData")?.value;
+		if (authData) userData = (await verifyOAuthJWT(authData)) || undefined;
+	}
+	if (minimumRole > 0 && !userData) {
+		return Astro.locals.login(Astro.url.toString());
+	}
+	if (userRole === undefined && userData) {
+		userRole =
+			(
+				await Astro.locals.db
+					.select()
+					.from(users)
+					.where(eq(users.email, userData.email))
+					.get()
+			)?.role || 1;
+	}
+	if ((userRole || 0) < minimumRole) {
+		return new Response("You lack the permissions to access this page", {
+			status: 403,
+		});
+	}
+}
 const { class: className, minimumRole = 0 } = Astro.props;
 let { userRole, userData } = Astro.props;
-if (userData === undefined) {
-	const authData = Astro.cookies.get("authData")?.value;
-	if (authData) userData = (await verifyOAuthJWT(authData)) || undefined;
-}
-if (minimumRole > 0 && !userData) {
-	return Astro.locals.login(Astro.url);
-}
-if (userRole === undefined && userData) {
-	userRole =
-		(
-			await Astro.locals.db
-				.select()
-				.from(users)
-				.where(eq(users.email, userData.email))
-				.get()
-		)?.role || 1;
-}
-if ((userRole || 0) < minimumRole) {
-	return new Response("You lack the permissions to access this page", {
-		status: 403,
-	});
-}
 ---
 
 <BaseLayout class={className}>
