@@ -1,3 +1,10 @@
 ---
-
+import AppLayout from "../../layouts/AppLayout.astro";
+import { users } from "../../schemas/users";
+const res = await Astro.locals.handle({
+	minimumRole: 10,
+});
+if (res.type === "error") return res.data;
 ---
+
+<AppLayout {...res.data} />

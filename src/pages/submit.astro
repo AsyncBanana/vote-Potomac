@@ -1,12 +1,15 @@
 ---
+import type { Code } from "astro:components";
 import Button from "../components/Button.svelte";
 import Textarea from "../components/Textarea.astro";
 import AppLayout from "../layouts/AppLayout.astro";
 import { UserRole } from "../schemas/users";
 export const prerender = false;
+const res = await Astro.locals.handle({ minimumRole: 1 });
+if (res.type === "error") return res.data;
 ---
 
-<AppLayout minimumRole={UserRole.user}>
+<AppLayout {...res.data} class="w-main">
 	<h1 class="font-bold text-5xl">Submit suggestion</h1>
 	<form
 		class="form-control flex"

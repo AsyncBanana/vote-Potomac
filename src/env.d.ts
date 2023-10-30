@@ -1,14 +1,22 @@
-type DBClient = import("drizzle-orm/libsql").LibSQLDatabase;
-type RawDBClient = import("@libsql/client").Client;
-type Env = import("astro/client").ImportMetaEnv;
-type OAuthToken = import("./modules/auth").OAuthToken;
 /// <reference types="astro/client" />
 declare namespace App {
 	interface Locals {
-		db: DBClient;
-		rawdb: RawDBClient;
+		db: import("drizzle-orm/libsql").LibSQLDatabase;
+		rawdb: import("@libsql/client").Client;
 		login: (redirectUrl?: string) => Response;
-		getSession: () => Promise<OAuthToken | Response>;
+		getSession: () => Promise<import("./modules/auth").OAuthToken | Response>;
+		handle: (
+			props: Partial<import("./layouts/AppLayout.astro").Props>,
+		) => Promise<
+			| {
+					type: "error";
+					data: Response;
+			  }
+			| {
+					type: "data";
+					data: import("./layouts/AppLayout.astro").Props;
+			  }
+		>;
 	}
 }
 interface ImportMetaEnv {
@@ -21,8 +29,9 @@ interface ImportMetaEnv {
 	readonly MAX_DESCRIPTION_LENGTH: number;
 	readonly GOOGLE_OAUTH_ID: string;
 	readonly GOOGLE_OAUTH_SECRET: string;
+	readonly AUTH_SECRET: string | { alg: "HS256"; kty: string; k: string };
 }
 
 interface ImportMeta {
-	readonly env: ImportMetaEnv;
+	readonly env: import("astro/client").ImportMetaEnv;
 }
