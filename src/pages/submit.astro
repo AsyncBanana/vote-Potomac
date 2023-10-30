@@ -1,21 +1,17 @@
 ---
 import Button from "../components/Button.svelte";
 import Textarea from "../components/Textarea.astro";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import { verifyOAuthJWT } from "../modules/auth";
-const authData = Astro.cookies.get("authData")?.value;
-const session = authData && (await verifyOAuthJWT(authData));
-if (!session) {
-	return Astro.locals.login("/submit");
-}
+import AppLayout from "../layouts/AppLayout.astro";
+import { UserRole } from "../schemas/users";
+export const prerender = false;
 ---
 
-<BaseLayout class="w-main">
+<AppLayout minimumRole={UserRole.user}>
 	<h1 class="font-bold text-5xl">Submit suggestion</h1>
 	<form
 		class="form-control flex"
 		id="suggestionSubmit"
-		action="/suggestion"
+		action="/api/suggestion"
 		method="post"
 	>
 		<label class="label" for="title">Title</label>
@@ -41,4 +37,4 @@ if (!session) {
 		</Textarea>
 		<Button class="mt-3">Suggest</Button>
 	</form>
-</BaseLayout>
+</AppLayout>

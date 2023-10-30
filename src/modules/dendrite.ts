@@ -13,6 +13,7 @@ export function generateDendrite(timestamp?: number) {
 	dendrite += Math.floor(Math.random() * 2 ** 20)
 		.toString(2)
 		.padStart(20, "0");
+
 	return parseInt(dendrite, 2);
 }
 export function extractDendrite(dendrite: number) {

@@ -1,10 +1,5 @@
-const textboxId: string = (
-	document.currentScript as HTMLScriptElement
-).getAttribute("data-textbox") as string;
-async function getHTML(value: string) {
-	const snarkdown = (await import("snarkdown")).default;
-	return snarkdown(value);
-}
+import snarkdown from "snarkdown";
+const textboxId = "textbox";
 async function terminateEvent(e: Event) {
 	e.preventDefault();
 	e.stopPropagation();
@@ -40,13 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
 			onClick: (e) => insertFormatting("~~", "~~", e),
 		},
 	];
-	previewButton.addEventListener("click", async () => {
+	previewButton.addEventListener("click", () => {
 		if (preview) {
 			textbox.classList.remove("hidden");
 			previewEl.classList.add("hidden");
 			previewButton.innerText = "Preview";
 		} else {
-			previewEl.innerHTML = await getHTML(textbox.value);
+			previewEl.innerHTML = snarkdown(textbox.value);
 			previewEl.style.height = `${textbox.offsetHeight}px`;
 			textbox.classList.add("hidden");
 			previewEl.classList.remove("hidden");

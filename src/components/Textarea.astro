@@ -41,14 +41,13 @@ import Button from "./Button.svelte";
 const outerClasses = `rounded-md b-1 b-neutral flex flex-col ${
 	shadow ? "!shadow-md " : ""
 }`;
-const sharedClasses = `px-6 py-3`;
 const inputClasses = `textarea rounded-t-none`;
 ---
 
 {
 	markdown ? (
 		<>
-			<script data-textbox={id} src={richText} />
+			<script src={richText} type="module" />
 			<label class="label" for={id}>
 				<div>
 					<slot />
@@ -110,7 +109,10 @@ const inputClasses = `textarea rounded-t-none`;
 						Preview
 					</Button>
 				</div>
-				<div class={`${sharedClasses} rounded-b-md hidden`} id="preview" />
+				<div
+					class={`px-4 py-2 rounded-b-md hidden prose max-w-full`}
+					id="preview"
+				/>
 				<textarea
 					{autocomplete}
 					{placeholder}
@@ -122,7 +124,9 @@ const inputClasses = `textarea rounded-t-none`;
 					{id}
 					{name}
 					{value}
-					class={`${inputClasses} ${resize ? "" : "resize-none "}${className}`}
+					class={`${inputClasses} text-base px-4 ${
+						resize ? "" : "resize-none "
+					}${className}`}
 				/>
 			</div>
 		</>
@@ -141,7 +145,9 @@ const inputClasses = `textarea rounded-t-none`;
 				{title}
 				{rows}
 				{cols}
-				class={`${resize ? "" : "resize-none "}${outerClasses}${className}`}
+				class={`text-base ${
+					resize ? "" : "resize-none "
+				}${outerClasses}${className}`}
 			/>
 		</label>
 	)

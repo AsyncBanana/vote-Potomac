@@ -5,6 +5,7 @@ import {
 	presetUno,
 	presetWebFonts,
 	transformerDirectives,
+	presetTypography,
 } from "unocss";
 import extractSvelte from "@unocss/extractor-svelte";
 import { presetDaisy } from "unocss-preset-daisy";
@@ -27,6 +28,7 @@ export default defineConfig({
 				// ...
 			},
 		}),
+		presetTypography(),
 		presetDaisy(),
 	],
 	transformers: [transformerDirectives()],

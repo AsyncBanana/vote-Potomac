@@ -1,6 +1,8 @@
 import type { APIRoute } from "astro";
 import { verifyOAuthJWT } from "../../modules/auth";
 import { SuggestionQueue } from "../../schemas/suggestion";
+import snarkdown from "snarkdown";
+import xss from "xss";
 export const POST: APIRoute = async (ctx) => {
 	const authData = ctx.cookies.get("authData")?.value;
 	const session = authData && (await verifyOAuthJWT(authData));
@@ -22,8 +24,8 @@ export const POST: APIRoute = async (ctx) => {
 			status: 400,
 		});
 	}
-	const title = body.get("title");
-	const description = body.get("description");
+	let title = body.get("title");
+	let description = body.get("description");
 	if (typeof title !== "string" || typeof description !== "string") {
 		return new Response("Please provide a title and description", {
 			status: 400,
@@ -46,9 +48,42 @@ export const POST: APIRoute = async (ctx) => {
 			},
 		);
 	}
-	ctx.locals.db.insert(SuggestionQueue).values({
-		title: title,
-		description: description,
-		author: session.email,
+	description = snarkdown(description);
+	// optimize using HTMLRewriter?
+	description = xss(description, {
+		allowCommentTag: false,
+		allowList: {
+			header: [],
+			code: ["class"],
+			pre: [],
+			blockquote: [],
+			a: ["href"],
+			strike: [],
+			strong: [],
+			img: ["src", "alt", "title"],
+			u: [],
+			br: [],
+			em: [],
+			ul: [],
+			li: [],
+			ol: [],
+		},
+		css: false,
+		stripIgnoreTagBody: ["script", "style"],
 	});
+	title = xss(title, {
+		allowCommentTag: false,
+		allowList: {},
+		css: false,
+		stripIgnoreTagBody: ["script", "style"],
+	});
+	const res = await ctx.locals.db
+		.insert(SuggestionQueue)
+		.values({
+			title,
+			description,
+			author: session.email,
+		})
+		.run();
+	return ctx.redirect("/");
 };

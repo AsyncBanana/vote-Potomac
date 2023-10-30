@@ -1,0 +1,92 @@
+---
+import { eq } from "drizzle-orm";
+import { UserRole, users } from "../schemas/users";
+import BaseLayout from "./BaseLayout.astro";
+import { verifyOAuthJWT, type OAuthToken } from "../modules/auth";
+import Button from "../components/Button.svelte";
+export interface Props {
+	class?: string;
+	userRole?: UserRole;
+	userData?: OAuthToken;
+	minimumRole?: UserRole;
+}
+const { class: className, minimumRole = 0 } = Astro.props;
+let { userRole, userData } = Astro.props;
+if (userData === undefined) {
+	const authData = Astro.cookies.get("authData")?.value;
+	if (authData) userData = (await verifyOAuthJWT(authData)) || undefined;
+}
+if (minimumRole > 0 && !userData) {
+	return Astro.locals.login(Astro.url);
+}
+if (userRole === undefined && userData) {
+	userRole =
+		(
+			await Astro.locals.db
+				.select()
+				.from(users)
+				.where(eq(users.email, userData.email))
+				.get()
+		)?.role || 1;
+}
+if ((userRole || 0) < minimumRole) {
+	return new Response("You lack the permissions to access this page", {
+		status: 403,
+	});
+}
+---
+
+<BaseLayout class={className}>
+	<div class="flex flex-col md:flex-row md:w-main place-content-center">
+		<h1 class="text-3xl md:text-5xl font-bold text-center">Vote! Potomac</h1>
+		<div class="flex flex-row gap-2 place-items-center lt-md:m-auto">
+			<Button type="tertiary" icon="i-ic:outline-plus" href="/submit">
+				New
+			</Button>
+			{
+				userData ? (
+					<details class="dropdown dropdown-end dropdown-bottom">
+						<summary class="m-1 btn btn-neutral btn-circle p-1">
+							<img
+								src={userData.picture}
+								alt="profile"
+								class="rounded-full"
+								referrerpolicy="no-referrer"
+							/>
+						</summary>
+						<ul class="p-2 shadow menu dropdown-content z-[1] bg-base-300 rounded-box">
+							<li class="p-3 text-center font-bold">
+								{userData.email.toUpperCase()}
+							</li>
+							{userRole >= 10 && (
+								<li>
+									<Button
+										href="/admin"
+										type="borderless"
+										class="place-content-center"
+									>
+										Admin Dashboard
+									</Button>
+								</li>
+							)}
+							<li>
+								<Button
+									href="/api/auth/signout"
+									type="borderless"
+									class="place-content-center"
+								>
+									Sign out
+								</Button>
+							</li>
+						</ul>
+					</details>
+				) : (
+					<Button type="tertiary" href="/api/auth/signin">
+						Sign in
+					</Button>
+				)
+			}
+		</div>
+	</div>
+	<slot />
+</BaseLayout>

@@ -1,54 +1,12 @@
 ---
+import AppLayout from "../layouts/AppLayout.astro";
 import Button from "../components/Button.svelte";
-import BaseLayout from "../layouts/BaseLayout.astro";
 import Suggestion from "../components/Suggestion.astro";
-import { verifyOAuthJWT } from "../modules/auth";
 export const prerender = false;
-const authData = Astro.cookies.get("authData")?.value;
-let session = authData && (await verifyOAuthJWT(authData));
+console.log(AppLayout({}));
 ---
 
-<BaseLayout>
-	<div class="flex flex-col md:flex-row md:w-main place-content-center">
-		<h1 class="text-3xl md:text-5xl font-bold text-center">Vote! Potomac</h1>
-		<div class="flex flex-row gap-2 place-items-center lt-md:m-auto">
-			<Button type="tertiary" icon="i-ic:outline-plus" href="/submit">
-				New
-			</Button>
-			{
-				session ? (
-					<details class="dropdown dropdown-end dropdown-bottom">
-						<summary class="m-1 btn btn-neutral btn-circle p-1">
-							<img
-								src={session.picture}
-								alt="profile"
-								class="rounded-full"
-								referrerpolicy="no-referrer"
-							/>
-						</summary>
-						<ul class="p-2 shadow menu dropdown-content z-[1] bg-base-300 rounded-box">
-							<li class="p-3 text-center font-bold">
-								{session.email.toUpperCase()}
-							</li>
-							<li>
-								<Button
-									href="/api/auth/signout"
-									type="borderless"
-									class="place-content-center"
-								>
-									Sign out
-								</Button>
-							</li>
-						</ul>
-					</details>
-				) : (
-					<Button type="tertiary" href="/api/auth/signin">
-						Sign in
-					</Button>
-				)
-			}
-		</div>
-	</div>
+<AppLayout>
 	<div class="flex flex-col gap-6 w-main">
 		<Suggestion
 			title="Create a student run GenAI working group"
@@ -66,4 +24,4 @@ let session = authData && (await verifyOAuthJWT(authData));
 			id="135315039"
 		/>
 	</div>
-</BaseLayout>
+</AppLayout>

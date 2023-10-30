@@ -8,7 +8,11 @@
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
-		"format": "prettier -w ."
+		"format": "prettier -w .",
+		"migrate:local": "drizzle-kit push:sqlite",
+		"migrate:prod": "NODE_ENV=production drizzle-kit push:sqlite",
+		"studio:local": "drizzle-kit studio",
+		"studio:prod": "NODE_ENV=production drizzle-kit studio"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^7.6.2",
@@ -21,13 +25,16 @@
 		"nanoid": "^5.0.2",
 		"snarkdown": "^2.0.0",
 		"solid-js": "^1.8.3",
-		"svelte": "^4.2.2"
+		"svelte": "^4.2.2",
+		"xss": "^1.0.14"
 	},
 	"devDependencies": {
 		"@iconify/json": "^2.2.133",
 		"@unocss/extractor-svelte": "^0.57.1",
 		"@unocss/reset": "^0.57.1",
+		"better-sqlite3": "^9.0.0",
 		"daisyui": "^3.9.3",
+		"drizzle-kit": "^0.19.13",
 		"prettier": "^3.0.3",
 		"prettier-plugin-astro": "^0.12.1",
 		"unocss": "^0.57.1",
