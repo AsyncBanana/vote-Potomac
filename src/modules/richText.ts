@@ -81,8 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
 				.split(" ")
 				.map((val) => {
 					if (done === true) return val;
-					i += val.length;
+					i += val.length + 1;
 					if (textbox.selectionStart < i) {
+						console.log("yes");
 						// current word is selected
 						done = true;
 						return before + val + after;

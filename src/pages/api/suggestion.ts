@@ -90,7 +90,7 @@ export const POST: APIRoute = async (ctx) => {
 		.values({
 			title,
 			description,
-			author: session.email,
+			author: session.id,
 		})
 		.run();
 	return ctx.redirect("/");

@@ -1,10 +1,41 @@
 ---
+import Button from "../../components/Button.svelte";
+import Card from "../../components/Card.svelte";
 import AppLayout from "../../layouts/AppLayout.astro";
-import { users } from "../../schemas/users";
+import { SuggestionQueue } from "../../schemas/suggestion";
 const res = await Astro.locals.handle({
 	minimumRole: 10,
 });
 if (res.type === "error") return res.data;
+const suggestions = await Astro.locals.db
+	.select()
+	.from(SuggestionQueue)
+	.limit(20)
+	.all();
 ---
 
-<AppLayout {...res.data} />
+<AppLayout {...res.data} class="w-main">
+	<h1 class="font-medium text-3xl">Admin Dashboard</h1>
+	{
+		suggestions.length > 0 ? (
+			suggestions.map((suggestion) => (
+				<Card title={suggestion.title} set:html={suggestion.description}>
+					<Button
+						slot="actions"
+						type="Borderless"
+						class="text-green-400 bg-base-300"
+						icon="i-ic:round-check"
+					/>
+					<Button
+						slot="actions"
+						type="Borderless"
+						class="text-red-400 bg-base-300"
+						icon="i-ic:round-close"
+					/>
+				</Card>
+			))
+		) : (
+			<p>No suggestions to moderate right now :{")"}</p>
+		)
+	}
+</AppLayout>

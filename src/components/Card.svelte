@@ -5,7 +5,7 @@
     } | undefined = undefined
     export let title: string;
 </script>
-<div class="card bg-base-100 shadow-xl">
+<div class="card bg-base-200 shadow-xl">
     {#if image}
     <figure><img src={image.src} alt={image.alt}/></figure>
     {/if}

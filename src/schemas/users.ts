@@ -6,7 +6,6 @@ export const enum UserRole {
 	user = 1,
 	admin = 10, // leave space for other roles in between
 }
-// Full storage of user data currently unecessary (emails are used as ids); Could change in future
 export const Users = sqliteTable("users", {
 	id: text("id").primaryKey().notNull(),
 	email: text("email").notNull(),
