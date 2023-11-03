@@ -1,9 +1,10 @@
-import { generateOAuthURL, verifyOAuthJWT } from "./modules/auth";
+import { generateOAuthURL, verifyJWT } from "./modules/auth";
 import getDB from "./modules/db";
 import type { MiddlewareResponseHandler } from "astro";
-import { users } from "./schemas/users";
+import { Users } from "./schemas/users";
 import { eq } from "drizzle-orm";
 import type { Props as AppLayoutProps } from "./layouts/AppLayout.astro";
+import { decode } from "@tsndr/cloudflare-worker-jwt";
 export const onRequest: MiddlewareResponseHandler = (ctx, next) => {
 	[ctx.locals.db, ctx.locals.rawdb] = getDB();
 	ctx.locals.login = (finalRedirectUrl) => {
@@ -30,25 +31,21 @@ export const onRequest: MiddlewareResponseHandler = (ctx, next) => {
 		if (!props.minimumRole) props.minimumRole = 0;
 		if (props.userData === undefined) {
 			const authData = ctx.cookies.get("authData")?.value;
-			if (authData)
-				props.userData = (await verifyOAuthJWT(authData)) || undefined;
+
+			if (authData) {
+				const decodedAuthData = decode(authData);
+				if (decodedAuthData.payload.sub)
+					props.userData = await ctx.locals.db
+						.select()
+						.from(Users)
+						.where(eq(Users.id, decodedAuthData.payload.sub))
+						.get();
+			}
 		}
 		if (props.minimumRole > 0 && !props.userData) {
 			return { type: "error", data: ctx.locals.login(ctx.url.toString()) };
 		}
-		if (props.userRole === undefined && props.userData) {
-			props.userRole =
-				(
-					await ctx.locals.db
-						.select()
-						.from(users)
-						.where(eq(users.email, props.userData.email))
-						.get()
-				)?.role || 1;
-		} else {
-			props.userRole = 0;
-		}
-		if (props.userRole < props.minimumRole) {
+		if ((props.userData?.role || 0) < props.minimumRole) {
 			return {
 				type: "error",
 				data: new Response("You lack the permissions to access this page", {

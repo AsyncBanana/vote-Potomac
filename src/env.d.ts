@@ -4,7 +4,6 @@ declare namespace App {
 		db: import("drizzle-orm/libsql").LibSQLDatabase;
 		rawdb: import("@libsql/client").Client;
 		login: (redirectUrl?: string) => Response;
-		getSession: () => Promise<import("./modules/auth").OAuthToken | Response>;
 		handle: (
 			props: Partial<import("./layouts/AppLayout.astro").Props>,
 		) => Promise<

@@ -1,3 +1,4 @@
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { integer } from "drizzle-orm/sqlite-core";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const enum UserRole {
@@ -6,7 +7,14 @@ export const enum UserRole {
 	admin = 10, // leave space for other roles in between
 }
 // Full storage of user data currently unecessary (emails are used as ids); Could change in future
-export const users = sqliteTable("users", {
-	email: text("emal").primaryKey().notNull(),
-	role: integer("role").$type<UserRole>().default(UserRole.user),
+export const Users = sqliteTable("users", {
+	id: text("id").primaryKey().notNull(),
+	email: text("email").notNull(),
+	role: integer("role").$type<UserRole>().default(UserRole.user).notNull(),
+	picture: text("picture").notNull(),
+	familyName: text("lastName").notNull(),
+	givenName: text("firstName").notNull(),
+	name: text("name").notNull(),
 });
+export type UsersSelect = InferSelectModel<typeof Users>;
+export type UsersInsert = InferInsertModel<typeof Users>;

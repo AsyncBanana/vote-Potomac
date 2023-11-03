@@ -1,14 +1,14 @@
 import type { APIRoute } from "astro";
 import {
 	exchangeToken,
-	verifyOAuthJWT,
-	type OAuthToken,
+	type GoogleOauthToken,
+	type JWT,
 } from "../../../modules/auth";
-import { decode } from "@tsndr/cloudflare-worker-jwt";
+import { Users } from "../../../schemas/users";
+import { decode, sign } from "@tsndr/cloudflare-worker-jwt";
 export const GET: APIRoute = async (ctx) => {
 	const code = ctx.url.searchParams.get("code");
 	if (!code) {
-		console.log(ctx.url.searchParams.get("error"));
 		return new Response("Error logging in", {
 			status: 500,
 		});
@@ -22,19 +22,52 @@ export const GET: APIRoute = async (ctx) => {
 	}
 
 	const res = await exchangeToken(code, ctx.url.origin + "/api/auth/callback");
-	const token = decode(res.id_token).payload as OAuthToken;
-	const decodedToken = await verifyOAuthJWT(res.id_token);
-	if (!decodedToken) {
+	const token = decode(res.id_token).payload as GoogleOauthToken;
+	if (!token)
 		return new Response("Invalid JWT", {
 			status: 400,
 		});
-	}
-	ctx.cookies.set("authData", res.id_token, {
+	if (!token.email_verified)
+		return new Response("Please verify your email", {
+			status: 403,
+		});
+	const user = await ctx.locals.db
+		.insert(Users)
+		.values({
+			email: token.email,
+			id: token.sub,
+			picture: token.picture,
+			familyName: token.family_name,
+			givenName: token.given_name,
+			name: token.name,
+		})
+		.onConflictDoUpdate({
+			target: Users.id,
+			set: {
+				email: token.email,
+				picture: token.picture,
+				familyName: token.family_name,
+				givenName: token.given_name,
+				name: token.name,
+			},
+		})
+		.returning()
+		.get();
+	const jwt = await sign(
+		{
+			iss: ctx.site?.toString(),
+			iat: Math.floor(Date.now() / 1000),
+			sub: user.id,
+			exp: token.exp,
+		} satisfies JWT,
+		import.meta.env.AUTH_SECRET,
+	);
+	ctx.cookies.set("authData", jwt, {
 		path: "/",
 		httpOnly: true,
 		secure: import.meta.env.PROD,
 		sameSite: "lax",
-		expires: new Date(decodedToken.exp * 1000),
+		expires: new Date(token.exp * 1000),
 	});
 	return ctx.redirect(ctx.cookies.get("authRedirectUrl")?.value || "/");
 };

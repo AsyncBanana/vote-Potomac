@@ -34,6 +34,6 @@ export default defineConfig({
 	transformers: [transformerDirectives()],
 	extractors: [extractSvelte()],
 	shortcuts: {
-		"w-main": "w-full p-6 max-w-3xl m-auto gap-3 flex flex-col",
+		"w-main": "w-full px-6 max-w-3xl m-auto gap-3 flex flex-col",
 	},
 });
