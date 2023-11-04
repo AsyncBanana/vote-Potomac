@@ -27,6 +27,19 @@ export const onRequest: MiddlewareResponseHandler = (ctx, next) => {
 		});
 		return ctx.redirect(redirectURL.toString());
 	};
+	ctx.locals.getSession = (req) => {
+		const authData = ctx.cookies.get("authData")?.value;
+
+		if (authData) {
+			const decodedAuthData = decode(authData);
+			if (decodedAuthData.payload.sub)
+				return ctx.locals.db
+					.select()
+					.from(Users)
+					.where(eq(Users.id, decodedAuthData.payload.sub))
+					.get();
+		}
+	};
 	ctx.locals.handle = async (props) => {
 		if (!props.minimumRole) props.minimumRole = 0;
 		if (props.userData === undefined) {

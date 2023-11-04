@@ -4,8 +4,9 @@
         alt: string
     } | undefined = undefined
     export let title: string;
+    export let id: string = undefined;
 </script>
-<div class="card bg-base-200 shadow-xl">
+<div class="card bg-base-200 shadow-xl" {id}>
     {#if image}
     <figure><img src={image.src} alt={image.alt}/></figure>
     {/if}

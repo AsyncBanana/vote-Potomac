@@ -16,6 +16,9 @@ declare namespace App {
 					data: import("./layouts/AppLayout.astro").Props;
 			  }
 		>;
+		getSession: (
+			req: Request,
+		) => import("drizzle-orm/sqlite-core").SQLiteSelectQueryBuilder;
 	}
 }
 interface ImportMetaEnv {
