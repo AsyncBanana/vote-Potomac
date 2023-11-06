@@ -4,7 +4,7 @@ import {
 	type GoogleOauthToken,
 	type JWT,
 } from "../../../modules/auth";
-import { Users } from "../../../schemas/users";
+import { Users } from "../../../schemas/user";
 import { decode, sign } from "@tsndr/cloudflare-worker-jwt";
 export const GET: APIRoute = async (ctx) => {
 	const code = ctx.url.searchParams.get("code");

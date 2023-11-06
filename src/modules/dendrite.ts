@@ -20,7 +20,7 @@ export function extractDendrite(dendrite: number) {
 	const strDendrite = dendrite.toString(2);
 	const timestamp = new Date(
 		parseInt(strDendrite.substring(0, strDendrite.length - 20), 2) * 1000 +
-			import.meta.env.EPOCH,
+			+import.meta.env.EPOCH,
 	);
 	return timestamp;
 }

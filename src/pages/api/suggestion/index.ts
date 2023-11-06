@@ -1,9 +1,8 @@
 import type { APIRoute } from "astro";
-import { SuggestionQueue } from "../../schemas/suggestion";
+import { SuggestionQueue } from "../../../schemas/suggestion";
 import snarkdown from "snarkdown";
 import xss from "xss";
-import { verifyJWT } from "../../modules/auth";
-import { Users } from "../../schemas/users";
+import { verifyJWT } from "../../../modules/auth";
 import { eq } from "drizzle-orm";
 export const POST: APIRoute = async (ctx) => {
 	const authData = ctx.cookies.get("authData")?.value;
@@ -11,17 +10,6 @@ export const POST: APIRoute = async (ctx) => {
 	if (!userId) {
 		return new Response("Not signed in", {
 			status: 401,
-		});
-	}
-	const session = await ctx.locals.db
-		.select()
-		.from(Users)
-		.where(eq(Users.id, userId))
-		.get();
-	if (!session) {
-		// I really hope this never happens
-		return new Response("User data not found", {
-			status: 400,
 		});
 	}
 	let body: FormData;
@@ -90,7 +78,7 @@ export const POST: APIRoute = async (ctx) => {
 		.values({
 			title,
 			description,
-			author: session.id,
+			author: userId,
 		})
 		.run();
 	return ctx.redirect("/");

@@ -12,7 +12,7 @@
     {/if}
     <div class="card-body">
       <h2 class="card-title">{title}</h2>
-      <p><slot/></p>
+      <p class="max-w-full text-wrap overflow-x-auto"><slot/></p>
       {#if ("actions" in $$slots)}
       <div class="card-actions justify-end">
         <slot name="actions"/>

@@ -12,6 +12,7 @@ const suggestions = await Astro.locals.db
 	.from(SuggestionQueue)
 	.limit(20)
 	.all();
+export const prerender = false;
 ---
 
 <AppLayout {...res.data} class="w-main">
@@ -46,8 +47,17 @@ const suggestions = await Astro.locals.db
 	}
 </AppLayout>
 <script>
-	for (const el of document.querySelectorAll(".approveButton,.rejectButton")) {
+	for (const el of document.querySelectorAll(
+		".approveButton,.rejectButton",
+	) as NodeListOf<HTMLButtonElement>) {
 		const type = el.id.split("-")[0];
 		const id = el.id.split("-")[1];
+		el.addEventListener("click", async () => {
+			await fetch(`/api/moderation/${type}`, {
+				method: "POST",
+				body: id,
+			});
+			document.getElementById(`suggestion-${id}`)?.remove();
+		});
 	}
 </script>

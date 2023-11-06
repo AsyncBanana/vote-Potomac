@@ -2,27 +2,43 @@
 import AppLayout from "../layouts/AppLayout.astro";
 import Button from "../components/Button.svelte";
 import Suggestion from "../components/Suggestion.astro";
+import { verifyJWT } from "../modules/auth";
+import { Suggestions } from "../schemas/suggestion";
+import { Users } from "../schemas/user";
+import { eq } from "drizzle-orm";
 export const prerender = false;
-const res = await Astro.locals.handle({});
+let id;
+const authData = Astro.cookies.get("authData")?.value;
+if (authData) {
+	id = await verifyJWT(authData);
+}
+const [suggestions, userData] = await Astro.locals.db.batch([
+	Astro.locals.db.select().from(Suggestions).limit(20),
+	...(id
+		? [
+				Astro.locals.db
+					.select()
+					.from(Users)
+					.where(eq(Users.id, id || "")),
+		  ]
+		: []), // the lengths I go to avoid naming things
+]);
+const res = await Astro.locals.handle(
+	userData ? { userData: userData[0] } : {},
+);
 if (res.type === "error") return res.data;
 ---
 
 <AppLayout {...res.data}>
 	<div class="flex flex-col gap-6 w-main">
-		<Suggestion
-			title="Create a student run GenAI working group"
-			votes={4}
-			id="135315039"
-		/>
-		<Suggestion
-			title="Introduce a breakfast option at school"
-			votes={2}
-			id="135315039"
-		/>
-		<Suggestion
-			title="Plan special events on the 24th of each month"
-			votes={1}
-			id="135315039"
-		/>
+		{
+			suggestions.map((suggestion) => (
+				<Suggestion
+					title={suggestion.title}
+					votes={suggestion.votes?.length || 0}
+					id={suggestion.id}
+				/>
+			))
+		}
 	</div>
 </AppLayout>

@@ -1,39 +1,82 @@
 ---
 import Button from "../../components/Button.svelte";
 import Suggestion from "../../components/Suggestion.astro";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import AppLayout from "../../layouts/AppLayout.astro";
+import { eq } from "drizzle-orm";
+import { verifyJWT } from "../../modules/auth";
+import { Suggestions } from "../../schemas/suggestion";
+import { Users } from "../../schemas/user";
+import { extractDendrite } from "../../modules/dendrite";
 const id = Astro.params.suggestionId;
 export const prerender = false;
+let userId;
+const authData = Astro.cookies.get("authData")?.value;
+if (!id) return new Response("Not found", { status: 404 });
+if (authData) {
+	userId = await verifyJWT(authData);
+}
+const [[suggestion], userData] = await Astro.locals.db.batch([
+	Astro.locals.db.select().from(Suggestions).where(eq(Suggestions.id, +id)),
+	...(id
+		? [
+				Astro.locals.db
+					.select()
+					.from(Users)
+					.where(eq(Users.id, id || "")),
+		  ]
+		: []), // the lengths I go to avoid naming things
+]);
+if (!suggestion) {
+	return new Response("Not found", {
+		status: 404,
+	});
+}
+const res = await Astro.locals.handle(
+	userData ? { userData: userData[0] } : {},
+);
+if (res.type === "error") return res.data;
 ---
 
-<BaseLayout class="w-main">
+<AppLayout {...res.data} class="w-main" id={`suggestion-${suggestion.id}`}>
 	<header class="flex flex-row gap-3 grow items-stretch">
-		<Button type="tertiary" class="h-auto" icon="i-bx:upvote" vertical>
-			4
+		<Button
+			type="tertiary"
+			class="h-auto"
+			icon="i-bx:upvote"
+			id="vote"
+			vertical
+		>
+			{suggestion.votes?.length || 0}
 		</Button>
 		<div>
 			<h1 class="text-3xl font-bold text-balance">
-				Create a student run GenAI working group
+				{suggestion.title}
 			</h1>
 			<div class="text-sm text-neutral-content font-medium">
-				Created 9/13/2023
+				Created {
+					extractDendrite(+id).toLocaleString(undefined, {
+						dateStyle: "short",
+						timeZone: "UTC",
+					})
+				}
 			</div>
 		</div>
 	</header>
-	<main class="text-lg leading-loose">
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
-		tempor incididunt ut labore et dolore magna aliqua. Aliquam id diam maecenas
-		ultricies mi eget. Urna id volutpat lacus laoreet non curabitur gravida.
-		Pellentesque eu tincidunt tortor aliquam nulla facilisi. Sagittis eu
-		volutpat odio facilisis mauris sit amet. Ut etiam sit amet nisl purus in
-		mollis. Vel facilisis volutpat est velit egestas dui id.
-	</main>
+	<main class="text-lg leading-loose" set:html={suggestion.description} />
 	<h1 class="text-2xl font-bold mt-6">More suggestions</h1>
 	<div>
 		<Suggestion
 			title="Introduce a breakfast option at school"
 			votes={1}
-			id="135315039"
+			id={135315039}
 		/>
 	</div>
-</BaseLayout>
+</AppLayout>
+<script>
+	document.getElementById("vote")?.addEventListener("click", async () => {
+		await fetch("/api/suggestion/vote", {
+			method: "POST",
+			body: document.querySelector("body")?.id.split("-")[1],
+		});
+	});
+</script>

@@ -1,5 +1,25 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+	customType,
+	index,
+	integer,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
 import { generateDendrite } from "../modules/dendrite";
+const CSVArray = customType<{
+	data: string[];
+	driverData: string;
+}>({
+	dataType() {
+		return `text`;
+	},
+	fromDriver(value: string): string[] {
+		return value.split(",").filter((val) => val /* only truthy values */);
+	},
+	toDriver(value: string[]): string {
+		return value.join(",") + ",";
+	},
+});
 export const Suggestions = sqliteTable(
 	"suggestions",
 	{
@@ -7,11 +27,11 @@ export const Suggestions = sqliteTable(
 		author: text("author").notNull(), // use id
 		title: text("title").notNull(),
 		description: text("description").notNull(),
-		upvotes: text("upvotes", { mode: "json" }),
+		votes: CSVArray("votes"),
 	},
 	(table) => {
 		return {
-			titleUpvoteIdx: index("titleUpvoteIdx").on(table.title, table.upvotes), // used for listing pages
+			titleVoteIdx: index("titleVoteIdx").on(table.title, table.votes), // used for listing pages
 		};
 	},
 );
@@ -20,5 +40,5 @@ export const SuggestionQueue = sqliteTable("suggestionQueue", {
 	author: text("author").notNull(), // use id
 	title: text("title").notNull(),
 	description: text("description").notNull(),
-	upvotes: text("upvotes", { mode: "json" }),
+	votes: CSVArray("votes"),
 });

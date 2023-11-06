@@ -1,7 +1,7 @@
 import { generateOAuthURL, verifyJWT } from "./modules/auth";
 import getDB from "./modules/db";
 import type { MiddlewareResponseHandler } from "astro";
-import { Users } from "./schemas/users";
+import { Users } from "./schemas/user";
 import { eq } from "drizzle-orm";
 import type { Props as AppLayoutProps } from "./layouts/AppLayout.astro";
 import { decode } from "@tsndr/cloudflare-worker-jwt";
@@ -27,33 +27,18 @@ export const onRequest: MiddlewareResponseHandler = (ctx, next) => {
 		});
 		return ctx.redirect(redirectURL.toString());
 	};
-	ctx.locals.getSession = (req) => {
+	// @ts-ignore
+	ctx.locals.getSession = async () => {
 		const authData = ctx.cookies.get("authData")?.value;
-
-		if (authData) {
-			const decodedAuthData = decode(authData);
-			if (decodedAuthData.payload.sub)
-				return ctx.locals.db
-					.select()
-					.from(Users)
-					.where(eq(Users.id, decodedAuthData.payload.sub))
-					.get();
-		}
+		if (!authData) return;
+		const id = await verifyJWT(authData);
+		if (!id) return;
+		return ctx.locals.db.select().from(Users).where(eq(Users.id, id)).get();
 	};
 	ctx.locals.handle = async (props) => {
 		if (!props.minimumRole) props.minimumRole = 0;
 		if (props.userData === undefined) {
-			const authData = ctx.cookies.get("authData")?.value;
-
-			if (authData) {
-				const decodedAuthData = decode(authData);
-				if (decodedAuthData.payload.sub)
-					props.userData = await ctx.locals.db
-						.select()
-						.from(Users)
-						.where(eq(Users.id, decodedAuthData.payload.sub))
-						.get();
-			}
+			props.userData = await ctx.locals.getSession();
 		}
 		if (props.minimumRole > 0 && !props.userData) {
 			return { type: "error", data: ctx.locals.login(ctx.url.toString()) };

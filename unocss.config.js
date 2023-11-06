@@ -9,6 +9,7 @@ import {
 } from "unocss";
 import extractSvelte from "@unocss/extractor-svelte";
 import { presetDaisy } from "unocss-preset-daisy";
+import themes from "daisyui/src/theming/themes";
 export default defineConfig({
 	shortcuts: [
 		// ...
@@ -29,7 +30,22 @@ export default defineConfig({
 			},
 		}),
 		presetTypography(),
-		presetDaisy(),
+		presetDaisy({
+			themes: [
+				{
+					light: {
+						...themes["[data-theme=light]"],
+						primary: "hsl(25 100% 50%)",
+					},
+				},
+				{
+					dark: {
+						...themes["[data-theme=dark]"],
+						primary: "hsl(25 100% 50%)",
+					},
+				},
+			],
+		}),
 	],
 	transformers: [transformerDirectives()],
 	extractors: [extractSvelte()],

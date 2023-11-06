@@ -16,9 +16,9 @@ declare namespace App {
 					data: import("./layouts/AppLayout.astro").Props;
 			  }
 		>;
-		getSession: (
-			req: Request,
-		) => import("drizzle-orm/sqlite-core").SQLiteSelectQueryBuilder;
+		getSession: () => Promise<
+			import("./schemas/user.ts").UsersSelect | undefined
+		>;
 	}
 }
 interface ImportMetaEnv {
@@ -32,6 +32,7 @@ interface ImportMetaEnv {
 	readonly GOOGLE_OAUTH_ID: string;
 	readonly GOOGLE_OAUTH_SECRET: string;
 	readonly AUTH_SECRET: string | { alg: "HS256"; kty: string; k: string };
+	readonly EPOCH: number;
 }
 
 interface ImportMeta {

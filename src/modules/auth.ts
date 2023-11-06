@@ -63,7 +63,7 @@ export async function exchangeToken(code: string, callbackURL: string) {
 	}
 	return json;
 }
-export async function verifyJWT(token: string): Promise<false | string> {
+export async function verifyJWT(token: string): Promise<undefined | string> {
 	// https://developers.google.com/identity/openid-connect/openid-connect#validatinganidtoken
 	// TODO add organization scoping? (see "hd" param)
 	if (
@@ -72,11 +72,11 @@ export async function verifyJWT(token: string): Promise<false | string> {
 			(await verify(token, import.meta.env.AUTH_SECRET))
 		)
 	) {
-		return false;
+		return;
 	}
-	const decodedToken = decode(token).payload as GoogleOauthToken;
+	const decodedToken = decode(token).payload as JWT;
 	if (decodedToken.exp < Date.now() / 1000) {
-		return false;
+		return;
 	}
 	return decodedToken.sub;
 }

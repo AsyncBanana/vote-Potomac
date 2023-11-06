@@ -3,8 +3,9 @@ import "../stylesheets/common.css";
 import { ViewTransitions } from "astro:transitions";
 export interface Props {
 	class?: string;
+	id?: string;
 }
-const { class: className } = Astro.props;
+const { class: className, id } = Astro.props;
 ---
 
 <html lang="en" transition:animate="slide">
@@ -16,7 +17,7 @@ const { class: className } = Astro.props;
 		<ViewTransitions />
 		<title>Astro</title>
 	</head>
-	<body class={className || ""} >
+	<body class={className || ""} {id}>
 		<slot />
 	</body>
 </html>

@@ -83,7 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
 					if (done === true) return val;
 					i += val.length + 1;
 					if (textbox.selectionStart < i) {
-						console.log("yes");
 						// current word is selected
 						done = true;
 						return before + val + after;
@@ -92,7 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
 				})
 				.join(" ");
 		}
-
 		textbox.value = value;
 		if (selectLoc) {
 			textbox.setSelectionRange(selectLoc, selectEndLoc || selectLoc);

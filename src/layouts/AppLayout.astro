@@ -1,19 +1,22 @@
 ---
-import { UserRole, type UsersSelect } from "../schemas/users";
+import { UserRole, type UsersSelect } from "../schemas/user";
 import BaseLayout from "./BaseLayout.astro";
 import Button from "../components/Button.svelte";
 export interface Props {
 	class?: string;
 	userData?: UsersSelect;
 	minimumRole: UserRole;
+	id?: string;
 }
-const { class: className, minimumRole } = Astro.props;
+const { class: className, id } = Astro.props;
 let { userData } = Astro.props;
 ---
 
-<BaseLayout class={className}>
+<BaseLayout class={className} {id}>
 	<div class="flex flex-col md:flex-row md:w-main place-content-center mt-3">
-		<h1 class="text-3xl md:text-5xl font-bold text-center">Vote! Potomac</h1>
+		<h1 class="text-3xl md:text-5xl font-bold text-center">
+			<a href="/">Vote! Potomac</a>
+		</h1>
 		<div class="flex flex-row gap-2 place-items-center lt-md:m-auto">
 			<Button type="tertiary" icon="i-ic:outline-plus" href="/submit">
 				New
