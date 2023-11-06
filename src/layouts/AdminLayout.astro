@@ -1,0 +1,30 @@
+---
+import AppLayout, { type Props as AppProps } from "./AppLayout.astro";
+const routes = {
+	Home: "/admin",
+	Roles: "/admin/roles",
+};
+export interface Props extends AppProps {
+	currentRoute: keyof typeof routes;
+}
+const { props } = Astro;
+---
+
+<AppLayout {...props} class="w-main">
+	<div class="flex flex-row gap-3">
+		<h1 class="font-medium text-3xl">Admin Dashboard</h1>
+		<div class="tabs tabs-boxed w-max">
+			{
+				Object.entries(routes).map(([name, url]) => (
+					<a
+						href={url}
+						class={`tab${name === props.currentRoute ? " tab-active" : ""}`}
+					>
+						{name}
+					</a>
+				))
+			}
+		</div>
+	</div>
+	<slot />
+</AppLayout>

@@ -17,12 +17,12 @@ if (authData) {
 }
 const [[suggestion], userData] = await Astro.locals.db.batch([
 	Astro.locals.db.select().from(Suggestions).where(eq(Suggestions.id, +id)),
-	...(id
+	...(userId
 		? [
 				Astro.locals.db
 					.select()
 					.from(Users)
-					.where(eq(Users.id, id || "")),
+					.where(eq(Users.id, userId || "")),
 		  ]
 		: []), // the lengths I go to avoid naming things
 ]);
@@ -40,7 +40,9 @@ if (res.type === "error") return res.data;
 <AppLayout {...res.data} class="w-main" id={`suggestion-${suggestion.id}`}>
 	<header class="flex flex-row gap-3 grow items-stretch">
 		<Button
-			type="tertiary"
+			type={userId && suggestion.votes?.includes(userId)
+				? "primary"
+				: "tertiary"}
 			class="h-auto"
 			icon="i-bx:upvote"
 			id="vote"
@@ -54,10 +56,16 @@ if (res.type === "error") return res.data;
 			</h1>
 			<div class="text-sm text-neutral-content font-medium">
 				Created {
-					extractDendrite(+id).toLocaleString(undefined, {
-						dateStyle: "short",
-						timeZone: "UTC",
-					})
+					extractDendrite(+id).toLocaleString(
+						Astro.request.headers.get("accept-language")?.split(",")[0] ||
+							"en-US",
+						{
+							timeZone:
+								(Astro.locals.runtime?.cf?.timezone as string) ||
+								"America/New_York",
+							dateStyle: "short",
+						},
+					)
 				}
 			</div>
 		</div>
@@ -73,10 +81,37 @@ if (res.type === "error") return res.data;
 	</div>
 </AppLayout>
 <script>
-	document.getElementById("vote")?.addEventListener("click", async () => {
-		await fetch("/api/suggestion/vote", {
-			method: "POST",
-			body: document.querySelector("body")?.id.split("-")[1],
-		});
+	const vote = document.getElementById("vote") as HTMLButtonElement;
+	const voteText = document.querySelector("#vote #text") as HTMLSpanElement;
+	vote.addEventListener("click", async () => {
+		if (vote.classList.contains("btn-outline")) {
+			const res = await fetch("/api/suggestion/vote", {
+				method: "POST",
+				body: document.querySelector("body")?.id.split("-")[1],
+			});
+			if (res.status === 401) {
+				document.location.assign(
+					`/api/auth/signin?redirectURL=${encodeURIComponent(
+						document.location.href,
+					)}`,
+				);
+			}
+			voteText.innerText = (+vote.innerText + 1).toString();
+		} else {
+			const res = await fetch("/api/suggestion/unvote", {
+				method: "POST",
+				body: document.querySelector("body")?.id.split("-")[1],
+			});
+			if (res.status === 401) {
+				document.location.assign(
+					`/api/auth/signin?redirectURL=${encodeURIComponent(
+						document.location.href,
+					)}`,
+				);
+			}
+			voteText.innerText = (+vote.innerText - 1).toString();
+		}
+		vote.classList.toggle("btn-outline");
+		vote.classList.toggle("btn-secondary");
 	});
 </script>

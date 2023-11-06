@@ -1,0 +1,53 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { UserRoleMaps, Users } from "../../schemas/user";
+import { desc } from "drizzle-orm";
+const res = await Astro.locals.handle({
+	minimumRole: 10,
+});
+if (res.type === "error") return res.data;
+const users = await Astro.locals.db
+	.select({
+		email: Users.email,
+		id: Users.id,
+		picture: Users.picture,
+		name: Users.name,
+		role: Users.role,
+	})
+	.from(Users)
+	.orderBy(desc(Users.role))
+	.limit(30)
+	.all();
+export const prerender = false;
+---
+
+<AdminLayout {...res.data} currentRoute="Roles">
+	<table class="table">
+		<thead>
+			<tr>
+				<th>User</th>
+				<th>Role</th>
+			</tr>
+		</thead>
+		<tbody>
+			{
+				users.map((user) => (
+					<tr>
+						<td class="flex flex-row w-full gap-3">
+							<img
+								referrerpolicy="no-referrer"
+								src={user.picture}
+								class="w-12 h-12 aspect-square rounded-md b-2 b-base-200"
+							/>
+							<div class="flex flex-col">
+								<span class="font-bold">{user.name}</span>
+								<span class="">{user.email}</span>
+							</div>
+						</td>
+						<td>{UserRoleMaps[user.role]}</td>
+					</tr>
+				))
+			}
+		</tbody>
+	</table>
+</AdminLayout>

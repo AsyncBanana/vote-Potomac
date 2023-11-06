@@ -12,20 +12,7 @@ const { title, votes, id } = Astro.props;
 	class="dark:bg-base-200 shadow-md rounded-lg flex flex-row gap-3 p-3 items-center light:b-1"
 	href={`/suggestions/${id}`}
 >
-	<Button type="tertiary" nonInteractive>
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			fill="none"
-			viewBox="0 0 24 24"
-			stroke-width="3"
-			stroke="currentColor"
-			class="w-6 h-6"
-		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				d="M4.5 15.75l7.5-7.5 7.5 7.5"></path>
-		</svg>
+	<Button type="tertiary" nonInteractive icon="i-bx:upvote">
 		{votes}
 	</Button>
 	<h2 class="col-span-4 text-xl align-middle font-bold">

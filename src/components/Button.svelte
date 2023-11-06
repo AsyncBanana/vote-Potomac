@@ -37,5 +37,5 @@
 	{href}
 	{title}
 	{id}
-	>{#if icon}<span class="{icon} h-6 w-6 {$$slots.default&&!vertical ? 'mr-1' : ''}" />{/if}<slot />
+	>{#if icon}<span class="{icon} h-6 w-6 {$$slots.default&&!vertical ? 'mr-1' : ''}" />{/if}<span id="text"><slot /></span>
 </svelte:element>

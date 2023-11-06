@@ -1,7 +1,7 @@
 ---
 import Button from "../../components/Button.svelte";
 import Card from "../../components/Card.svelte";
-import AppLayout from "../../layouts/AppLayout.astro";
+import AdminLayout from "../../layouts/AdminLayout.astro";
 import { SuggestionQueue } from "../../schemas/suggestion";
 const res = await Astro.locals.handle({
 	minimumRole: 10,
@@ -15,8 +15,7 @@ const suggestions = await Astro.locals.db
 export const prerender = false;
 ---
 
-<AppLayout {...res.data} class="w-main">
-	<h1 class="font-medium text-3xl">Admin Dashboard</h1>
+<AdminLayout {...res.data} currentRoute="Home">
 	{
 		suggestions.length > 0 ? (
 			suggestions.map((suggestion) => (
@@ -45,7 +44,7 @@ export const prerender = false;
 			<p>No suggestions to moderate right now :{")"}</p>
 		)
 	}
-</AppLayout>
+</AdminLayout>
 <script>
 	for (const el of document.querySelectorAll(
 		".approveButton,.rejectButton",

@@ -1,6 +1,6 @@
 /// <reference types="astro/client" />
 declare namespace App {
-	interface Locals {
+	interface Locals extends Runtime {
 		db: import("drizzle-orm/libsql").LibSQLDatabase;
 		rawdb: import("@libsql/client").Client;
 		login: (redirectUrl?: string) => Response;
@@ -34,7 +34,7 @@ interface ImportMetaEnv {
 	readonly AUTH_SECRET: string | { alg: "HS256"; kty: string; k: string };
 	readonly EPOCH: number;
 }
-
 interface ImportMeta {
 	readonly env: import("astro/client").ImportMetaEnv;
 }
+type Runtime = import("@astrojs/cloudflare").AdvancedRuntime<ENV>;
