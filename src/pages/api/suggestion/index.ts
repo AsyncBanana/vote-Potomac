@@ -81,5 +81,13 @@ export const POST: APIRoute = async (ctx) => {
 			author: userId,
 		})
 		.run();
-	return ctx.redirect("/");
+	const expireDate = new Date();
+	expireDate.setTime(expireDate.getTime() + 300000 /* 5 minutes */);
+	ctx.cookies.set("notification", "SUGGESTION_CREATED", {
+		httpOnly: true,
+		secure: import.meta.env.PROD,
+		expires: expireDate,
+		path: "/",
+	});
+	return ctx.redirect(`/`);
 };

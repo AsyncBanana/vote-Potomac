@@ -2,8 +2,9 @@
 import Button from "../components/Button.svelte";
 import Textarea from "../components/Textarea.astro";
 import AppLayout from "../layouts/AppLayout.astro";
+import { UserRole } from "../schemas/user";
 export const prerender = false;
-const res = await Astro.locals.handle({ minimumRole: 1 });
+const res = await Astro.locals.handle({ minimumRole: UserRole.user });
 if (res.type === "error") return res.data;
 ---
 

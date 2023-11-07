@@ -2,6 +2,7 @@
 import Button from "../../components/Button.svelte";
 import Card from "../../components/Card.svelte";
 import AdminLayout from "../../layouts/AdminLayout.astro";
+import { extractDendrite } from "../../modules/dendrite";
 import { SuggestionQueue } from "../../schemas/suggestion";
 const res = await Astro.locals.handle({
 	minimumRole: 10,
@@ -21,6 +22,9 @@ export const prerender = false;
 			suggestions.map((suggestion) => (
 				<Card
 					title={suggestion.title}
+					subtitle={`Created on ${extractDendrite(
+						suggestion.id,
+					).toLocaleDateString()}`}
 					set:html={suggestion.description}
 					id={`suggestion-${suggestion.id}`}
 				>

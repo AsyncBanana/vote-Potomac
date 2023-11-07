@@ -4,7 +4,9 @@ import Suggestion from "../components/Suggestion.astro";
 import { verifyJWT } from "../modules/auth";
 import { Suggestions } from "../schemas/suggestion";
 import { Users } from "../schemas/user";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import Button from "../components/Button.svelte";
+import { notifications } from "../modules/notification";
 export const prerender = false;
 let id;
 const authData = Astro.cookies.get("authData")?.value;
@@ -12,7 +14,11 @@ if (authData) {
 	id = await verifyJWT(authData);
 }
 const [suggestions, userData] = await Astro.locals.db.batch([
-	Astro.locals.db.select().from(Suggestions).limit(20),
+	Astro.locals.db
+		.select()
+		.from(Suggestions)
+		.limit(20)
+		.orderBy(desc(Suggestions.id)),
 	...(id
 		? [
 				Astro.locals.db
@@ -26,10 +32,31 @@ const res = await Astro.locals.handle(
 	userData ? { userData: userData[0] } : {},
 );
 if (res.type === "error") return res.data;
+const notification = Astro.cookies.get("notification")?.value as
+	| keyof typeof notifications
+	| undefined;
+if (notification) {
+	Astro.cookies.delete("notification");
+}
 ---
 
 <AppLayout {...res.data}>
-	<div class="flex flex-col gap-6 w-main">
+	<div class="flex flex-col gap-3 mt-3 w-main">
+		{
+			notification && (
+				<div class="alert" id="notification">
+					<span class="i-ic:round-check" />
+					<span>{notifications[notification]}</span>
+					<div>
+						<Button
+							type="tertiary"
+							icon="i-ic:round-close"
+							onclick="document.getElementById('notification').remove()"
+						/>
+					</div>
+				</div>
+			)
+		}
 		{
 			suggestions.map((suggestion) => (
 				<Suggestion
