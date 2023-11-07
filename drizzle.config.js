@@ -13,6 +13,6 @@ export default {
 	driver: process.env.NODE_ENV === "production" ? "turso" : "libsql",
 	dbCredentials: {
 		url: env.DATABASE_URL,
-		authToken: env.DATABASE_TOKEN,
+		authToken: env.DATABASE_SECRET,
 	},
 };

@@ -13,7 +13,6 @@ const suggestions = await Astro.locals.db
 	.from(SuggestionQueue)
 	.limit(20)
 	.all();
-export const prerender = false;
 ---
 
 <AdminLayout {...res.data} currentRoute="Home">

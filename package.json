@@ -4,6 +4,7 @@
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "astro dev",
+		"wrangler": "wrangler",
 		"start": "astro dev",
 		"build": "astro build",
 		"preview": "astro preview",
@@ -38,6 +39,7 @@
 		"prettier": "^3.0.3",
 		"prettier-plugin-astro": "^0.12.1",
 		"unocss": "^0.57.1",
-		"unocss-preset-daisy": "^7.0.0"
+		"unocss-preset-daisy": "^7.0.0",
+		"wrangler": "^3.15.0"
 	}
 }

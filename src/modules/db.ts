@@ -4,7 +4,7 @@ import type { LibSQLDatabase } from "drizzle-orm/libsql";
 export default function getDB(): [LibSQLDatabase, RawLibSQLDatabase] {
 	const client = createClient({
 		url: import.meta.env.DATABASE_URL,
-		authToken: import.meta.env.DATABASE_TOKEN,
+		authToken: import.meta.env.DATABASE_SECRET,
 	});
 	return [drizzle(client), client];
 }

@@ -1,6 +1,7 @@
 ---
+import Button from "../../components/Button.svelte";
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { UserRoleMaps, Users } from "../../schemas/user";
+import { UserRole, UserRoleMaps, Users } from "../../schemas/user";
 import { desc } from "drizzle-orm";
 const res = await Astro.locals.handle({
 	minimumRole: 10,
@@ -18,7 +19,6 @@ const users = await Astro.locals.db
 	.orderBy(desc(Users.role))
 	.limit(30)
 	.all();
-export const prerender = false;
 ---
 
 <AdminLayout {...res.data} currentRoute="Roles">
@@ -32,7 +32,7 @@ export const prerender = false;
 		<tbody>
 			{
 				users.map((user) => (
-					<tr>
+					<tr id={`user-${user.id}`}>
 						<td class="flex flex-row w-full gap-3">
 							<img
 								referrerpolicy="no-referrer"
@@ -46,10 +46,41 @@ export const prerender = false;
 								</span>
 							</div>
 						</td>
-						<td>{UserRoleMaps[user.role]}</td>
+						<td>
+							<select class="select select-bordered w-full roleChange">
+								{Object.entries(UserRoleMaps).map(
+									([roleNumber, roleName]) =>
+										+roleNumber !== UserRole.unauthenticated && (
+											<option selected={user.role === +roleNumber}>
+												{roleName}
+											</option>
+										),
+								)}
+							</select>
+						</td>
 					</tr>
 				))
 			}
 		</tbody>
 	</table>
 </AdminLayout>
+<script>
+	import { UserRoleMaps } from "../../schemas/user";
+	const roleChangeSelects = document.querySelectorAll(
+		".roleChange",
+	) as unknown as NodeListOf<HTMLSelectElement>;
+	roleChangeSelects.forEach((select) => {
+		select.addEventListener("change", async () => {
+			await fetch("/api/user/role", {
+				method: "POST",
+				body: JSON.stringify({
+					user: select.parentElement?.parentElement?.id.split("-")[1],
+					role: Object.keys(UserRoleMaps).find(
+						// @ts-expect-error
+						(key) => UserRoleMaps[key] === select.value,
+					),
+				}),
+			});
+		});
+	});
+</script>

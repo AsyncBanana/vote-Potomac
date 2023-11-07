@@ -8,7 +8,7 @@ import { Suggestions } from "../../schemas/suggestion";
 import { Users } from "../../schemas/user";
 import { extractDendrite } from "../../modules/dendrite";
 const id = Astro.params.suggestionId;
-export const prerender = false;
+
 let userId;
 const authData = Astro.cookies.get("authData")?.value;
 if (!id) return new Response("Not found", { status: 404 });

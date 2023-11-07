@@ -10,9 +10,7 @@ export const POST: APIRoute = async (ctx) => {
 			.delete(SuggestionQueue)
 			.where(eq(SuggestionQueue.id, id))
 			.run();
-		return new Response("Rejected comment", {
-			status: 200,
-		});
+		return new Response("Rejected comment");
 	} else if (action === "approve") {
 		await ctx.locals.db.batch([
 			ctx.locals.db.run(
@@ -20,12 +18,9 @@ export const POST: APIRoute = async (ctx) => {
 			),
 			ctx.locals.db.delete(SuggestionQueue),
 		]);
-		return new Response("Approved comment", {
-			status: 200,
-		});
+		return new Response("Approved comment");
 	}
 	return new Response("Invalid action", {
 		status: 400,
 	});
 };
-export const prerender = false;
