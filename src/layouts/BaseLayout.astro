@@ -4,7 +4,7 @@ export interface Props {
 	class?: string;
 	id?: string;
 }
-const { class: className, id } = Astro.props;
+const { class: className = "", id } = Astro.props;
 ---
 
 <html lang="en">
@@ -15,7 +15,34 @@ const { class: className, id } = Astro.props;
 		<meta name="robots" content="noindex" />
 		<title>Vote! Potomac</title>
 	</head>
-	<body class={className || ""} {id}>
-		<slot />
+	<body class={`min-h-screen flex flex-col`} {id}>
+		<div class={`h-max ${className}`}><slot /></div>
+
+		<div class="w-full mt-auto bg-base-100 p-3">
+			<div class="flex gap-3">
+				<img
+					src="/potomac.svg"
+					class="aspect-square h-12 rounded-full bg-secondary"
+				/>
+				<div>
+					<div class="font-semibold">Vote! Potomac</div>
+					<div>Potomac US Official Suggestion Box</div>
+				</div>
+			</div>
+			<div class="text-sm">
+				Created by <a href="https://asyncbanana.dev" class="underline"
+					>Jacob Jackson</a
+				>
+			</div>
+			<div class="text-sm">
+				Licensed under GPLv3 - <a
+					href="https://github.com/AsyncBanana/vote-Potomac"
+					class="underline">Source code</a
+				>
+			</div>
+			<a class="text-sm underline" href="https://www.potomacschool.org/">
+				The Potomac School</a
+			>
+		</div>
 	</body>
 </html>

@@ -36,12 +36,14 @@ export default defineConfig({
 					light: {
 						...themes["[data-theme=light]"],
 						primary: "hsl(25 100% 50%)",
+						secondary: "hsl(208 100% 32%)",
 					},
 				},
 				{
 					dark: {
 						...themes["[data-theme=dark]"],
 						primary: "hsl(25 100% 50%)",
+						secondary: "hsl(208 100% 32%)",
 					},
 				},
 			],
@@ -50,6 +52,6 @@ export default defineConfig({
 	transformers: [transformerDirectives()],
 	extractors: [extractSvelte()],
 	shortcuts: {
-		"w-main": "w-full px-6 max-w-3xl m-auto gap-3 flex flex-col",
+		"w-main": "w-full px-6 max-w-3xl mx-auto gap-3 flex flex-col",
 	},
 });
