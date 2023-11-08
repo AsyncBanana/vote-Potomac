@@ -15,15 +15,22 @@ const suggestions = await Astro.locals.db
 	.all();
 ---
 
-<AdminLayout {...res.data} currentRoute="Home">
+<AdminLayout {...res.data} currentRoute="Moderation">
 	{
 		suggestions.length > 0 ? (
 			suggestions.map((suggestion) => (
 				<Card
 					title={suggestion.title}
-					subtitle={`Created on ${extractDendrite(
-						suggestion.id,
-					).toLocaleDateString()}`}
+					subtitle={`Created ${extractDendrite(suggestion.id).toLocaleString(
+						Astro.request.headers.get("accept-language")?.split(",")[0] ||
+							"en-US",
+						{
+							timeZone:
+								(Astro.locals.runtime?.cf?.timezone as string) ||
+								"America/New_York",
+							dateStyle: "short",
+						},
+					)}`}
 					set:html={suggestion.description}
 					id={`suggestion-${suggestion.id}`}
 				>

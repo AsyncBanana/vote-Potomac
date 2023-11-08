@@ -21,7 +21,7 @@ const users = await Astro.locals.db
 	.all();
 ---
 
-<AdminLayout {...res.data} currentRoute="Roles">
+<AdminLayout {...res.data} currentRoute="Users">
 	<table class="table">
 		<thead>
 			<tr>

@@ -1,6 +1,38 @@
-.w-main {
-	@apply;
-}
 :root body {
 	@apply dark:text-gray-100;
 }
+
+// Used to solve annoying Windi/DaisyUI conflicts (UnoCSS follows WindiCSS's spec, DaisyUI follows Tailwind)
+.tab {
+	--tab-color: hsl(var(--bc) / var(--tw-text-opacity, 1));
+	--tab-bg: hsl(var(--b1) / var(--tw-bg-opacity, 1));
+	--tab-border-color: hsl(var(--b3) / var(--tw-bg-opacity, 1));
+	color: var(--tab-color);
+	padding-left: var(--tab-padding, 1rem);
+	padding-right: var(--tab-padding, 1rem);
+	&.tab-active:not(.tab-disabled):not([disabled]) {
+	  @apply border-base-content border-opacity-100 text-opacity-100;
+	}
+	&:focus {
+	  @apply outline-none;
+	}
+	&:focus-visible {
+	  outline: 2px solid currentColor;
+	  outline-offset: -3px;
+	  &.tab-lifted {
+		border-bottom-right-radius: var(--tab-radius, 0.5rem);
+		border-bottom-left-radius: var(--tab-radius, 0.5rem);
+	  }
+	}
+	/* disabled */
+	&-disabled,
+	[disabled] {
+	  @apply text-base-content cursor-not-allowed text-opacity-20;
+	}
+	@media (hover: hover) {
+	  &[disabled],
+	  &[disabled]:hover {
+		@apply text-base-content cursor-not-allowed text-opacity-20;
+	  }
+	}
+  }
