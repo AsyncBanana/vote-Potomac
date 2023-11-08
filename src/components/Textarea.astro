@@ -47,7 +47,6 @@ const inputClasses = `textarea rounded-t-none`;
 {
 	markdown ? (
 		<>
-			<script src={richText} type="module" />
 			<label class="label" for={id}>
 				<div>
 					<slot />
@@ -152,3 +151,4 @@ const inputClasses = `textarea rounded-t-none`;
 		</label>
 	)
 }
+<script src="../modules/richText.ts"></script>

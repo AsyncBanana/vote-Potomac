@@ -3,7 +3,6 @@ import { SuggestionQueue } from "../../../schemas/suggestion";
 import snarkdown from "snarkdown";
 import xss from "xss";
 import { verifyJWT } from "../../../modules/auth";
-import { eq } from "drizzle-orm";
 export const POST: APIRoute = async (ctx) => {
 	const authData = ctx.cookies.get("authData")?.value;
 	const userId = authData && (await verifyJWT(authData));
@@ -54,7 +53,7 @@ export const POST: APIRoute = async (ctx) => {
 			pre: [],
 			blockquote: [],
 			a: ["href"],
-			strike: [],
+			s: [],
 			strong: [],
 			img: ["src", "alt", "title"],
 			u: [],

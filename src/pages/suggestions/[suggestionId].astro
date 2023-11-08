@@ -2,7 +2,7 @@
 import Button from "../../components/Button.svelte";
 import Suggestion from "../../components/Suggestion.astro";
 import AppLayout from "../../layouts/AppLayout.astro";
-import { eq } from "drizzle-orm";
+import { desc, eq, ne } from "drizzle-orm";
 import { verifyJWT } from "../../modules/auth";
 import { Suggestions } from "../../schemas/suggestion";
 import { Users } from "../../schemas/user";
@@ -15,8 +15,14 @@ if (!id) return new Response("Not found", { status: 404 });
 if (authData) {
 	userId = await verifyJWT(authData);
 }
-const [[suggestion], userData] = await Astro.locals.db.batch([
+const [[suggestion], suggestions, userData] = await Astro.locals.db.batch([
 	Astro.locals.db.select().from(Suggestions).where(eq(Suggestions.id, +id)),
+	Astro.locals.db
+		.select()
+		.from(Suggestions)
+		.where(ne(Suggestions.id, +id))
+		.orderBy(desc(Suggestions.id))
+		.limit(5),
 	...(userId
 		? [
 				Astro.locals.db
@@ -73,11 +79,15 @@ if (res.type === "error") return res.data;
 	<main class="text-lg leading-loose" set:html={suggestion.description} />
 	<h1 class="text-2xl font-bold mt-6">More suggestions</h1>
 	<div>
-		<Suggestion
-			title="Introduce a breakfast option at school"
-			votes={1}
-			id={135315039}
-		/>
+		{
+			suggestions.map((suggestion) => (
+				<Suggestion
+					title={suggestion.title}
+					votes={suggestion.votes?.length || 0}
+					id={suggestion.id}
+				/>
+			))
+		}
 	</div>
 </AppLayout>
 <script>
