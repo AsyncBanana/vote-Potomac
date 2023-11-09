@@ -63,6 +63,7 @@ if (notification) {
 					title={suggestion.title}
 					votes={suggestion.votes?.length || 0}
 					id={suggestion.id}
+					hasVoted={userData && suggestion.votes?.includes(userData[0].id)}
 				/>
 			))
 		}

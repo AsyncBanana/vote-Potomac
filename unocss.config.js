@@ -36,6 +36,7 @@ export default defineConfig({
 					light: {
 						...themes["[data-theme=light]"],
 						primary: "hsl(25 100% 50%)",
+						"primary-content": "white",
 						secondary: "hsl(208 100% 32%)",
 					},
 				},
@@ -43,6 +44,7 @@ export default defineConfig({
 					dark: {
 						...themes["[data-theme=dark]"],
 						primary: "hsl(25 100% 50%)",
+						"primary-content": "white",
 						secondary: "hsl(208 100% 32%)",
 					},
 				},

@@ -30,7 +30,7 @@ let { userData } = Astro.props;
 			{
 				userData ? (
 					<details class="dropdown dropdown-end dropdown-bottom">
-						<summary class="m-1 btn btn-neutral btn-circle p-1">
+						<summary class="m-1 btn btn-circle p-1">
 							<img
 								src={userData.picture}
 								alt="profile"
@@ -38,7 +38,7 @@ let { userData } = Astro.props;
 								referrerpolicy="no-referrer"
 							/>
 						</summary>
-						<ul class="p-3 shadow menu dropdown-content z-[1] bg-base-300 rounded-box flex gap-3">
+						<ul class="p-3 shadow menu dropdown-content z-1 bg-base-100 rounded-box flex gap-3">
 							<li class="px-3 text-center font-bold">
 								{userData.email.toUpperCase()}
 							</li>

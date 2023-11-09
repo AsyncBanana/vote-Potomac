@@ -3,16 +3,21 @@ import Button from "./Button.svelte";
 interface Props {
 	title: string;
 	votes: number;
+	hasVoted?: boolean;
 	id: number;
 }
-const { title, votes, id } = Astro.props;
+const { title, votes, id, hasVoted } = Astro.props;
 ---
 
 <a
 	class="dark:bg-base-200 shadow-md rounded-lg flex flex-row gap-3 p-3 items-center light:b-1"
 	href={`/suggestions/${id}`}
 >
-	<Button type="tertiary" nonInteractive icon="i-bx:upvote">
+	<Button
+		type={hasVoted ? "primary" : "tertiary"}
+		nonInteractive
+		icon="i-bx:upvote"
+	>
 		{votes}
 	</Button>
 	<h2 class="col-span-4 text-xl align-middle font-bold">
