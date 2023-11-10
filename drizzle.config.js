@@ -9,7 +9,7 @@ const { parsed: env } = config({
 
 /** @type { import("drizzle-kit").Config } */
 export default {
-	schema: "./src/schemas/*.ts",
+	schema: "./src/schemas/!(fts)*.ts",
 	driver: process.env.NODE_ENV === "production" ? "turso" : "libsql",
 	dbCredentials: {
 		url: env.DATABASE_URL,

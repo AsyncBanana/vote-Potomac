@@ -63,9 +63,10 @@ export async function exchangeToken(code: string, callbackURL: string) {
 	}
 	return json;
 }
-export async function verifyJWT(token: string): Promise<undefined | string> {
+export async function verifyJWT(token?: string): Promise<undefined | string> {
 	// https://developers.google.com/identity/openid-connect/openid-connect#validatinganidtoken
 	// TODO add organization scoping? (see "hd" param)
+	if (!token) return;
 	if (
 		!(
 			// add multi-key support to worker-jwt?

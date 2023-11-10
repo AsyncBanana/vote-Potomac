@@ -1,0 +1,13 @@
+import {
+	customType,
+	index,
+	integer,
+	sqliteTable,
+	text,
+} from "drizzle-orm/sqlite-core";
+import { CSVArray } from "./suggestion";
+export const SuggestionsFTS = sqliteTable("suggestions_fts", {
+	id: integer("id").primaryKey(),
+	title: text("title").notNull(),
+	votes: CSVArray("votes"),
+});

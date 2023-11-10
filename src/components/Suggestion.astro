@@ -11,7 +11,7 @@ const { title, votes, id, hasVoted } = Astro.props;
 
 <a
 	class="dark:bg-base-200 shadow-md rounded-lg flex flex-row gap-3 p-3 items-center light:b-1"
-	href={`/suggestions/${id}`}
+	href={`/suggestion/${id}`}
 >
 	<Button
 		type={hasVoted ? "primary" : "tertiary"}

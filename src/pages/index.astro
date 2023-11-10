@@ -4,21 +4,31 @@ import Suggestion from "../components/Suggestion.astro";
 import { verifyJWT } from "../modules/auth";
 import { Suggestions } from "../schemas/suggestion";
 import { Users } from "../schemas/user";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import Button from "../components/Button.svelte";
 import { notifications } from "../modules/notification";
+import { SuggestionsFTS } from "../schemas/fts";
+import SuggestionsView from "./api/suggestions.astro";
 export const prerender = false;
 let id;
 const authData = Astro.cookies.get("authData")?.value;
 if (authData) {
 	id = await verifyJWT(authData);
 }
+const query = Astro.url.searchParams.get("q");
 const [suggestions, userData] = await Astro.locals.db.batch([
-	Astro.locals.db
-		.select()
-		.from(Suggestions)
-		.limit(20)
-		.orderBy(desc(Suggestions.id)),
+	query
+		? Astro.locals.db
+				.select()
+				.from(SuggestionsFTS)
+				.where(sql`${SuggestionsFTS.title} MATCH ${query}`)
+				.limit(20)
+				.orderBy(sql`rank`)
+		: Astro.locals.db
+				.select()
+				.from(Suggestions)
+				.limit(20)
+				.orderBy(desc(Suggestions.id)),
 	...(id
 		? [
 				Astro.locals.db
@@ -57,15 +67,44 @@ if (notification) {
 				</div>
 			)
 		}
-		{
-			suggestions.map((suggestion) => (
-				<Suggestion
-					title={suggestion.title}
-					votes={suggestion.votes?.length || 0}
-					id={suggestion.id}
-					hasVoted={userData && suggestion.votes?.includes(userData[0].id)}
-				/>
-			))
-		}
+		<div
+			class="input input-bordered w-full flex align-middle items-center gap-3"
+		>
+			<div class="i-material-symbols:search h-6 w-6"></div>
+			<input
+				type="search"
+				placeholder="Search for suggestions..."
+				class="bg-transparent h-full grow"
+				id="suggestionSearch"
+				value={query}
+			/>
+		</div>
+		<div id="suggestions" class="flex flex-col gap-3">
+			<SuggestionsView
+				userData={userData && userData[0]}
+				suggestions={suggestions}
+			/>
+		</div>
 	</div>
 </AppLayout>
+<script>
+	async function querySearch(q: string = search.value) {
+		const res = await fetch(`/api/suggestions?q=${q}`);
+		if (!res.ok) return;
+		suggestions.innerHTML = await res.text();
+		history.pushState(q, "", q ? `/?q=${encodeURIComponent(q)}` : "/");
+	}
+	let searchFunc: NodeJS.Timeout;
+	const search = document.getElementById(
+		"suggestionSearch",
+	) as HTMLInputElement;
+	const suggestions = document.getElementById("suggestions") as HTMLDivElement;
+	search.addEventListener("input", (e) => {
+		if (searchFunc) clearTimeout(searchFunc);
+		searchFunc = setTimeout(querySearch, 600);
+	});
+	addEventListener("popstate", async (event) => {
+		search.value = event.state;
+		await querySearch(event.state);
+	});
+</script>

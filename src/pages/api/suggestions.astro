@@ -1,0 +1,49 @@
+---
+import { desc, sql, type InferSelectModel } from "drizzle-orm";
+import { Suggestions as SuggestionsTable } from "../../schemas/suggestion";
+import { SuggestionsFTS } from "../../schemas/fts";
+import Suggestion from "../../components/Suggestion.astro";
+import type { Users } from "../../schemas/user";
+import { verifyJWT } from "../../modules/auth";
+export interface Props {
+	suggestions?:
+		| InferSelectModel<typeof SuggestionsTable>[]
+		| InferSelectModel<typeof SuggestionsFTS>[];
+	userData?: InferSelectModel<typeof Users>;
+	query?: string;
+}
+const query = Astro.props.query || Astro.url.searchParams.get("q");
+const suggestions =
+	Astro.props.suggestions ||
+	(await (query
+		? Astro.locals.db
+				.select()
+				.from(SuggestionsFTS)
+				.where(sql`${SuggestionsFTS.title} MATCH ${query}`)
+				.limit(20)
+				.orderBy(sql`rank`)
+		: Astro.locals.db
+				.select()
+				.from(SuggestionsTable)
+				.limit(20)
+				.orderBy(desc(SuggestionsTable.id))));
+const id =
+	Astro.props.userData?.id ||
+	(await verifyJWT(Astro.cookies.get("authData")?.value));
+export const partial = true;
+---
+
+{
+	suggestions.length > 0 ? (
+		suggestions.map((suggestion) => (
+			<Suggestion
+				title={suggestion.title}
+				votes={suggestion.votes?.length || 0}
+				id={suggestion.id}
+				hasVoted={!!id && suggestion.votes?.includes(id)}
+			/>
+		))
+	) : (
+		<p class="text-center">No suggestions found</p>
+	)
+}

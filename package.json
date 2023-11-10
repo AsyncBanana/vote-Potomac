@@ -12,8 +12,8 @@
 		"tail": "wrangler pages deployment tail",
 		"astro": "astro",
 		"format": "prettier -w .",
-		"migrate:local": "drizzle-kit push:sqlite",
-		"migrate:prod": "NODE_ENV=production drizzle-kit push:sqlite",
+		"migrate:local": "drizzle-kit push:sqlite && bun run ./migrations.js",
+		"migrate:prod": "NODE_ENV=production drizzle-kit push:sqlite && bun run ./migrations.js",
 		"studio:local": "drizzle-kit studio",
 		"studio:prod": "NODE_ENV=production drizzle-kit studio"
 	},
@@ -37,6 +37,7 @@
 		"@unocss/reset": "^0.57.1",
 		"better-sqlite3": "^9.0.0",
 		"daisyui": "^3.9.3",
+		"dotenv": "^16.3.1",
 		"drizzle-kit": "^0.19.13",
 		"prettier": "^3.0.3",
 		"prettier-plugin-astro": "^0.12.1",

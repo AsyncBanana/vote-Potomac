@@ -6,7 +6,7 @@ import {
 	text,
 } from "drizzle-orm/sqlite-core";
 import { generateDendrite } from "../modules/dendrite";
-const CSVArray = customType<{
+export const CSVArray = customType<{
 	data: string[];
 	driverData: string;
 }>({
