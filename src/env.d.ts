@@ -33,6 +33,7 @@ interface ImportMetaEnv {
 	readonly GOOGLE_OAUTH_SECRET: string;
 	readonly AUTH_SECRET: string | { alg: "HS256"; kty: string; k: string };
 	readonly EPOCH: number;
+	readonly ORGANIZATION?: string;
 }
 interface ImportMeta {
 	readonly env: import("astro/client").ImportMetaEnv;

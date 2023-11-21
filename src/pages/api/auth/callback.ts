@@ -31,6 +31,15 @@ export const GET: APIRoute = async (ctx) => {
 		return new Response("Please verify your email", {
 			status: 403,
 		});
+	if (import.meta.env.ORGANIZATION && token.hd !== import.meta.env.ORGANIZATION)
+		return new Response(
+			`Invalid organization; Please sign in with a ${
+				import.meta.env.ORGANIZATION
+			} account`,
+			{
+				status: 403,
+			},
+		);
 	const user = await ctx.locals.db
 		.insert(Users)
 		.values({

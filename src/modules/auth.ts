@@ -14,6 +14,7 @@ export interface GoogleOauthToken {
 	locale: string;
 	iat: number;
 	exp: number;
+	hd: string;
 }
 export interface JWT {
 	iss?: string;
@@ -42,6 +43,7 @@ export function generateOAuthURL(callbackURL: string): [URL, string] {
 		scope: "openid email profile",
 		access_type: "online",
 		state: state,
+		hd: import.meta.env.ORGANIZATION || "",
 	}).toString();
 	return [url, state];
 }
@@ -64,15 +66,8 @@ export async function exchangeToken(code: string, callbackURL: string) {
 	return json;
 }
 export async function verifyJWT(token?: string): Promise<undefined | string> {
-	// https://developers.google.com/identity/openid-connect/openid-connect#validatinganidtoken
-	// TODO add organization scoping? (see "hd" param)
 	if (!token) return;
-	if (
-		!(
-			// add multi-key support to worker-jwt?
-			(await verify(token, import.meta.env.AUTH_SECRET))
-		)
-	) {
+	if (!(await verify(token, import.meta.env.AUTH_SECRET))) {
 		return;
 	}
 	const decodedToken = decode(token).payload as JWT;
