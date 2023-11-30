@@ -5,7 +5,7 @@ import AppLayout from "../../layouts/AppLayout.astro";
 import { desc, eq, ne } from "drizzle-orm";
 import { verifyJWT } from "../../modules/auth";
 import { Suggestions } from "../../schemas/suggestion";
-import { Users } from "../../schemas/user";
+import { UserRole, Users } from "../../schemas/user";
 import { extractDendrite } from "../../modules/dendrite";
 const id = Astro.params.suggestionId;
 
@@ -21,7 +21,7 @@ const [[suggestion], suggestions, userData] = await Astro.locals.db.batch([
 		.select()
 		.from(Suggestions)
 		.where(ne(Suggestions.id, +id))
-		.orderBy(desc(Suggestions.id))
+		.orderBy(desc(Suggestions.votes))
 		.limit(5),
 	...(userId
 		? [
@@ -40,6 +40,9 @@ if (!suggestion) {
 const res = await Astro.locals.handle(
 	userData ? { userData: userData[0] } : {},
 );
+const canDelete =
+	suggestion.author === userId /* is author */ ||
+	userData?.[0]?.role >= UserRole.admin; /* is admin */
 if (res.type === "error") return res.data;
 ---
 
@@ -75,10 +78,20 @@ if (res.type === "error") return res.data;
 				}
 			</div>
 		</div>
+		{
+			canDelete && (
+				<Button
+					type="tertiary"
+					class="justify-self-end ml-auto self-center"
+					id="deletionButton"
+					icon="i-material-symbols:delete-outline"
+				/>
+			)
+		}
 	</header>
 	<main class="text-lg leading-loose" set:html={suggestion.description} />
 	<h1 class="text-2xl font-bold mt-6">More suggestions</h1>
-	<div>
+	<div class="flex flex-col gap-3">
 		{
 			suggestions.map((suggestion) => (
 				<Suggestion
@@ -89,15 +102,39 @@ if (res.type === "error") return res.data;
 			))
 		}
 	</div>
+	<dialog class="modal" id="deletionModal">
+		<div class="modal-box">
+			<h3 class="font-bold text-lg">Delete Suggestion</h3>
+			<p class="py-4">
+				Are you sure you wish to delete this suggestion? This action is
+				permanent.
+			</p>
+			<div class="modal-action">
+				<form method="dialog">
+					<Button type="tertiary" autofocus>Close</Button>
+				</form>
+				<form method="dialog">
+					<Button type="error" value="delete">Delete</Button>
+				</form>
+			</div>
+		</div>
+	</dialog>
 </AppLayout>
 <script>
 	const vote = document.getElementById("vote") as HTMLButtonElement;
 	const voteText = document.querySelector("#vote #text") as HTMLSpanElement;
+	const deletionButton = document.getElementById(
+		"deletionButton",
+	) as HTMLButtonElement;
+	const deletionModal = document.getElementById(
+		"deletionModal",
+	) as HTMLDialogElement;
+	const suggestionId = document.querySelector("body")?.id.split("-")[1];
 	vote.addEventListener("click", async () => {
 		if (vote.classList.contains("btn-outline")) {
 			const res = await fetch("/api/suggestion/vote", {
 				method: "POST",
-				body: document.querySelector("body")?.id.split("-")[1],
+				body: suggestionId,
 			});
 			if (res.status === 401) {
 				document.location.assign(
@@ -110,7 +147,7 @@ if (res.type === "error") return res.data;
 		} else {
 			const res = await fetch("/api/suggestion/unvote", {
 				method: "POST",
-				body: document.querySelector("body")?.id.split("-")[1],
+				body: suggestionId,
 			});
 			if (res.status === 401) {
 				document.location.assign(
@@ -124,4 +161,19 @@ if (res.type === "error") return res.data;
 		vote.classList.toggle("btn-outline");
 		vote.classList.toggle("btn-primary");
 	});
+	if (deletionButton) {
+		deletionButton.addEventListener("click", () => {
+			deletionModal.showModal();
+		});
+		deletionModal.addEventListener("close", async (e) => {
+			console.log(deletionModal.returnValue);
+			if (deletionModal.returnValue === "delete") {
+				await fetch("/api/suggestion/delete", {
+					method: "POST",
+					body: suggestionId,
+				});
+				window.location.assign("/");
+			}
+		});
+	}
 </script>

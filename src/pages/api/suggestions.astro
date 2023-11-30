@@ -11,8 +11,10 @@ export interface Props {
 		| InferSelectModel<typeof SuggestionsFTS>[];
 	userData?: InferSelectModel<typeof Users>;
 	query?: string;
+	sort?: "top" | "recent";
 }
 const query = Astro.props.query || Astro.url.searchParams.get("q");
+const sort = Astro.props.sort || Astro.url.searchParams.get("sort");
 const suggestions =
 	Astro.props.suggestions ||
 	(await (query
@@ -26,7 +28,9 @@ const suggestions =
 				.select()
 				.from(SuggestionsTable)
 				.limit(20)
-				.orderBy(desc(SuggestionsTable.id))));
+				.orderBy(
+					desc(sort === "top" ? SuggestionsTable.votes : SuggestionsTable.id),
+				)));
 const id =
 	Astro.props.userData?.id ||
 	(await verifyJWT(Astro.cookies.get("authData")?.value));

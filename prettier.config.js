@@ -1,5 +1,6 @@
 /** @type {import("prettier").Config} */
-module.exports = {
+export default {
+	plugins: ["prettier-plugin-astro"],
 	useTabs: true,
 	overrides: [
 		{

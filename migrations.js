@@ -35,7 +35,7 @@ END;
 	client.run(sql`CREATE TRIGGER IF NOT EXISTS suggestions_ad AFTER DELETE ON ${Suggestions}
 BEGIN
     INSERT INTO suggestions_fts (suggestions_fts ,rowid, title, votes)
-    VALUES ('delete', new.id, new.title, new.votes);
+    VALUES ('delete', old.id, old.title, old.votes);
 END;
 `),
 	client.run(sql`CREATE TRIGGER IF NOT EXISTS suggestions_au AFTER UPDATE ON ${Suggestions}

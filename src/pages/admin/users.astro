@@ -1,7 +1,7 @@
 ---
 import Button from "../../components/Button.svelte";
 import AdminLayout from "../../layouts/AdminLayout.astro";
-import { UserRole, UserRoleMaps, Users } from "../../schemas/user";
+import { UserRole, UserRoleMaps, Users as UserTable } from "../../schemas/user";
 import { desc } from "drizzle-orm";
 const res = await Astro.locals.handle({
 	minimumRole: 10,
@@ -9,14 +9,14 @@ const res = await Astro.locals.handle({
 if (res.type === "error") return res.data;
 const users = await Astro.locals.db
 	.select({
-		email: Users.email,
-		id: Users.id,
-		picture: Users.picture,
-		name: Users.name,
-		role: Users.role,
+		email: UserTable.email,
+		id: UserTable.id,
+		picture: UserTable.picture,
+		name: UserTable.name,
+		role: UserTable.role,
 	})
-	.from(Users)
-	.orderBy(desc(Users.role))
+	.from(UserTable)
+	.orderBy(desc(UserTable.role))
 	.limit(30)
 	.all();
 ---
@@ -33,7 +33,7 @@ const users = await Astro.locals.db
 			{
 				users.map((user) => (
 					<tr id={`user-${user.id}`}>
-						<td class="flex flex-row w-full gap-3">
+						<td class="flex flex-row w-full gap-3 mb-2">
 							<img
 								referrerpolicy="no-referrer"
 								src={user.picture}
