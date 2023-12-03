@@ -63,7 +63,7 @@ if (res.type === "error") return res.data;
 			<h1 class="text-3xl font-bold text-balance">
 				{suggestion.title}
 			</h1>
-			<div class="text-sm text-neutral-content font-medium">
+			<div class="text-sm text-opacity-60 text-base-content font-medium">
 				Created {
 					extractDendrite(+id).toLocaleString(
 						Astro.request.headers.get("accept-language")?.split(",")[0] ||
