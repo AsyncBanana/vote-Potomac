@@ -1,0 +1,121 @@
+---
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import {
+	UserRole,
+	UserRoleMaps,
+	Users as UserTable,
+} from "../../../schemas/user";
+import { desc } from "drizzle-orm";
+const res = await Astro.locals.handle({
+	minimumRole: 10,
+});
+const page = +(Astro.params.page ?? 0);
+if (Number.isNaN(page)) return new Response("Not found", { status: 404 });
+if (res.type === "error") return res.data;
+const users = await Astro.locals.db
+	.select({
+		email: UserTable.email,
+		id: UserTable.id,
+		picture: UserTable.picture,
+		name: UserTable.name,
+		role: UserTable.role,
+	})
+	.from(UserTable)
+	.orderBy(desc(UserTable.role))
+	.limit(30)
+	.offset(page * 30)
+	.all();
+---
+
+<AdminLayout {...res.data} currentRoute="Users">
+	<div class="overflow-x-auto m-auto">
+		{
+			users.length > 0 ? (
+				<table class="w-full">
+					<thead>
+						<tr>
+							<th>User</th>
+							<th>Role</th>
+						</tr>
+					</thead>
+					<tbody>
+						{users.map((user) => (
+							<tr id={`user-${user.id}`} class="w-full">
+								<td class="flex flex-row gap-3 mb-2 w-max mr-2">
+									<img
+										referrerpolicy="no-referrer"
+										src={user.picture}
+										class="w-12 h-12 aspect-square rounded-md b-2 b-base-200"
+									/>
+									<div class="flex flex-col">
+										<span class="font-bold">{user.name}</span>
+										<span class="text-neutral-content text-sm font-medium">
+											{user.email}
+										</span>
+									</div>
+								</td>
+								<td class="w-max">
+									<select class="select w-full select-bordered roleChange">
+										{Object.entries(UserRoleMaps).map(
+											([roleNumber, roleName]) =>
+												+roleNumber !== UserRole.unauthenticated && (
+													<option selected={user.role === +roleNumber}>
+														{roleName}
+													</option>
+												),
+										)}
+									</select>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			) : (
+				<p>No users found</p>
+			)
+		}
+	</div>
+	<div class="tabs tabs-boxed w-max m-auto">
+		{
+			page > 0 ? (
+				<a
+					href={`/admin/users/${page - 1}`}
+					class={`tab i-ic:round-keyboard-arrow-left`}
+				/>
+			) : (
+				<div class={`tab tab-disabled i-ic:round-keyboard-arrow-left`} />
+			)
+		}
+		<div class="px-4 self-center">{page}</div>
+		{
+			users.length > 29 ? (
+				<a
+					href={`/admin/users/${page + 1}`}
+					class={`tab i-ic:round-keyboard-arrow-right`}
+				/>
+			) : (
+				<div class={`tab tab-disabled i-ic:round-keyboard-arrow-right`} />
+			)
+		}
+	</div>
+</AdminLayout>
+<script>
+	import { UserRoleMaps } from "../../../schemas/user";
+	const roleChangeSelects = document.querySelectorAll(
+		".roleChange",
+	) as unknown as NodeListOf<HTMLSelectElement>;
+	roleChangeSelects.forEach((select) => {
+		select.addEventListener("change", async () => {
+			await fetch("/api/user/role", {
+				method: "POST",
+				body: JSON.stringify({
+					user: select.parentElement?.parentElement?.id.split("-")[1],
+					role: Object.keys(UserRoleMaps).find(
+						// @ts-expect-error
+						(key) => UserRoleMaps[key] === select.value,
+					),
+				}),
+			});
+		});
+	});
+</script>
