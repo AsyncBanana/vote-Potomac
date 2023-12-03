@@ -19,6 +19,7 @@ export const POST: APIRoute = async (ctx) => {
 		.update(Suggestions)
 		.set({
 			votes: sql`replace(${Suggestions.votes},${userId}||",","")`,
+			voteCount: sql`${Suggestions.voteCount}-1`,
 		})
 		.where(
 			and(

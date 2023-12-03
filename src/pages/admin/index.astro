@@ -16,44 +16,46 @@ const suggestions = await Astro.locals.db
 ---
 
 <AdminLayout {...res.data} currentRoute="Moderation">
-	{
-		suggestions.length > 0 ? (
-			suggestions.map((suggestion) => (
-				<Card
-					title={suggestion.title}
-					subtitle={`Created ${extractDendrite(suggestion.id).toLocaleString(
-						Astro.request.headers.get("accept-language")?.split(",")[0] ||
-							"en-US",
-						{
-							timeZone:
-								(Astro.locals.runtime?.cf?.timezone as string) ||
-								"America/New_York",
-							dateStyle: "short",
-						},
-					)}`}
-					set:html={suggestion.description}
-					id={`suggestion-${suggestion.id}`}
-				>
-					<Button
-						slot="actions"
-						type="Borderless"
-						class="text-green-400 bg-base-300 approveButton"
-						icon="i-ic:round-check"
-						id={`approve-${suggestion.id}`}
-					/>
-					<Button
-						slot="actions"
-						type="Borderless"
-						class="text-red-400 bg-base-300 rejectButton"
-						icon="i-ic:round-close"
-						id={`reject-${suggestion.id}`}
-					/>
-				</Card>
-			))
-		) : (
-			<p>No suggestions to moderate right now :{")"}</p>
-		)
-	}
+	<div class="gap-3">
+		{
+			suggestions.length > 0 ? (
+				suggestions.map((suggestion) => (
+					<Card
+						title={suggestion.title}
+						subtitle={`Created ${extractDendrite(suggestion.id).toLocaleString(
+							Astro.request.headers.get("accept-language")?.split(",")[0] ||
+								"en-US",
+							{
+								timeZone:
+									(Astro.locals.runtime?.cf?.timezone as string) ||
+									"America/New_York",
+								dateStyle: "short",
+							},
+						)}`}
+						set:html={suggestion.description}
+						id={`suggestion-${suggestion.id}`}
+					>
+						<Button
+							slot="actions"
+							type="Borderless"
+							class="text-green-400 bg-base-300 approveButton"
+							icon="i-ic:round-check"
+							id={`approve-${suggestion.id}`}
+						/>
+						<Button
+							slot="actions"
+							type="Borderless"
+							class="text-red-400 bg-base-300 rejectButton"
+							icon="i-ic:round-close"
+							id={`reject-${suggestion.id}`}
+						/>
+					</Card>
+				))
+			) : (
+				<p>No suggestions to moderate right now :{")"}</p>
+			)
+		}
+	</div>
 </AdminLayout>
 <script>
 	for (const el of document.querySelectorAll(

@@ -5,27 +5,41 @@ import { SuggestionsFTS } from "../../schemas/fts";
 import Suggestion from "../../components/Suggestion.astro";
 import type { Users } from "../../schemas/user";
 import { verifyJWT } from "../../modules/auth";
+interface PartialSuggestion {
+	id: number;
+	voteCount: number | null;
+	title: string;
+	votes: string[] | null;
+}
 export interface Props {
-	suggestions?:
-		| InferSelectModel<typeof SuggestionsTable>[]
-		| InferSelectModel<typeof SuggestionsFTS>[];
+	suggestions?: PartialSuggestion[];
 	userData?: InferSelectModel<typeof Users>;
 	query?: string;
 	sort?: "top" | "recent";
 }
 const query = Astro.props.query || Astro.url.searchParams.get("q");
 const sort = Astro.props.sort || Astro.url.searchParams.get("sort");
-const suggestions =
+const suggestions: PartialSuggestion[] =
 	Astro.props.suggestions ||
 	(await (query
 		? Astro.locals.db
-				.select()
+				.select({
+					id: SuggestionsFTS.id,
+					title: SuggestionsFTS.title,
+					voteCount: SuggestionsFTS.voteCount,
+					votes: SuggestionsFTS.votes,
+				})
 				.from(SuggestionsFTS)
 				.where(sql`${SuggestionsFTS.title} MATCH ${query}`)
 				.limit(20)
 				.orderBy(sql`rank`)
 		: Astro.locals.db
-				.select()
+				.select({
+					id: SuggestionsTable.id,
+					title: SuggestionsTable.title,
+					voteCount: SuggestionsTable.voteCount,
+					votes: SuggestionsTable.votes,
+				})
 				.from(SuggestionsTable)
 				.limit(20)
 				.orderBy(
@@ -42,7 +56,7 @@ export const partial = true;
 		suggestions.map((suggestion) => (
 			<Suggestion
 				title={suggestion.title}
-				votes={suggestion.votes?.length || 0}
+				votes={suggestion?.voteCount || 0}
 				id={suggestion.id}
 				hasVoted={!!id && suggestion.votes?.includes(id)}
 			/>

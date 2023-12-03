@@ -1,6 +1,5 @@
 ---
 import AppLayout from "../layouts/AppLayout.astro";
-import Suggestion from "../components/Suggestion.astro";
 import { verifyJWT } from "../modules/auth";
 import { Suggestions } from "../schemas/suggestion";
 import { Users } from "../schemas/user";
@@ -20,17 +19,27 @@ const sortOrder = Astro.url.searchParams.get("sort") || "top";
 const [suggestions, userData] = await Astro.locals.db.batch([
 	query
 		? Astro.locals.db
-				.select()
+				.select({
+					id: SuggestionsFTS.id,
+					title: SuggestionsFTS.title,
+					voteCount: SuggestionsFTS.voteCount,
+					votes: SuggestionsFTS.votes,
+				})
 				.from(SuggestionsFTS)
 				.where(sql`${SuggestionsFTS.title} MATCH ${query}`)
 				.limit(20)
 				.orderBy(sql`rank`)
 		: Astro.locals.db
-				.select()
+				.select({
+					id: Suggestions.id,
+					title: Suggestions.title,
+					voteCount: Suggestions.voteCount,
+					votes: Suggestions.votes,
+				})
 				.from(Suggestions)
 				.limit(20)
 				.orderBy(
-					desc(sortOrder === "top" ? Suggestions.votes : Suggestions.id),
+					desc(sortOrder === "top" ? Suggestions.voteCount : Suggestions.id),
 				),
 	...(id
 		? [

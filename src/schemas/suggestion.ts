@@ -20,6 +20,14 @@ export const CSVArray = customType<{
 		return value.join(",") + ",";
 	},
 });
+export const VoteCount = customType<{
+	data: number;
+	driverData: number;
+}>({
+	dataType() {
+		return `INT GENERATED ALWAYS as (LENGTH(votes) - LENGTH(REPLACE(votes, ',', ''))) STORED`;
+	},
+});
 export const Suggestions = sqliteTable(
 	"suggestions",
 	{
@@ -28,10 +36,17 @@ export const Suggestions = sqliteTable(
 		title: text("title").notNull(),
 		description: text("description").notNull(),
 		votes: CSVArray("votes"),
+		// change to generated column `VoteCount()` when drizzle is fixed
+		voteCount: integer("voteCount").default(0),
 	},
 	(table) => {
 		return {
-			titleVoteIdx: index("titleVoteIdx").on(table.title, table.votes), // used for listing pages
+			titleVoteIdx: index("titleVoteIdx").on(
+				table.title,
+				table.voteCount,
+				table.votes,
+				table.id,
+			), // used for listing pages
 		};
 	},
 );
@@ -41,4 +56,5 @@ export const SuggestionQueue = sqliteTable("suggestionQueue", {
 	title: text("title").notNull(),
 	description: text("description").notNull(),
 	votes: CSVArray("votes"),
+	voteCount: integer("voteCount").default(0),
 });

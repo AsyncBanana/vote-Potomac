@@ -96,7 +96,7 @@ if (res.type === "error") return res.data;
 			suggestions.map((suggestion) => (
 				<Suggestion
 					title={suggestion.title}
-					votes={suggestion.votes?.length || 0}
+					votes={suggestion?.voteCount || 0}
 					id={suggestion.id}
 				/>
 			))
