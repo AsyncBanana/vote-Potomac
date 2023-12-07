@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { UserRole, UserRoleMaps, Users } from "../../../schemas/user";
+import { eq } from "drizzle-orm";
 export interface RoleChange {
 	user: string;
 	role: UserRole;
@@ -23,8 +24,11 @@ export const POST: APIRoute = async (ctx) => {
 		return new Response("Invalid body", {
 			status: 400,
 		});
-	await ctx.locals.db.update(Users).set({
-		role: data.role,
-	});
+	await ctx.locals.db
+		.update(Users)
+		.set({
+			role: data.role,
+		})
+		.where(eq(Users.id, data.user));
 	return new Response("Changed user role");
 };
