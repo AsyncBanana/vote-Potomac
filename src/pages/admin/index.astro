@@ -3,72 +3,116 @@ import Button from "../../components/Button.svelte";
 import Card from "../../components/Card.svelte";
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import { extractDendrite } from "../../modules/dendrite";
+import { CommentQueue } from "../../schemas/comment";
 import { SuggestionQueue } from "../../schemas/suggestion";
 const res = await Astro.locals.handle({
 	minimumRole: 10,
 });
 if (res.type === "error") return res.data;
-const suggestions = await Astro.locals.db
-	.select()
-	.from(SuggestionQueue)
-	.limit(20)
-	.all();
+const [suggestions, comments] = await Astro.locals.db.batch([
+	Astro.locals.db.select().from(SuggestionQueue).limit(10),
+	Astro.locals.db.select().from(CommentQueue).limit(10),
+]);
 ---
 
 <AdminLayout {...res.data} currentRoute="Moderation">
-	<div class="flex flex-col gap-3">
-		{
-			suggestions.length > 0 ? (
-				suggestions.map((suggestion) => (
-					<Card
-						title={suggestion.title}
-						subtitle={`Created ${extractDendrite(suggestion.id).toLocaleString(
-							Astro.request.headers.get("accept-language")?.split(",")[0] ||
-								"en-US",
-							{
-								timeZone:
-									(Astro.locals.runtime?.cf?.timezone as string) ||
-									"America/New_York",
-								dateStyle: "short",
-							},
-						)}`}
-						set:html={suggestion.description}
-						id={`suggestion-${suggestion.id}`}
-					>
-						<Button
-							slot="actions"
-							type="Borderless"
-							class="text-green-400 bg-base-300 approveButton"
-							icon="i-ic:round-check"
-							id={`approve-${suggestion.id}`}
-						/>
-						<Button
-							slot="actions"
-							type="Borderless"
-							class="text-red-400 bg-base-300 rejectButton"
-							icon="i-ic:round-close"
-							id={`reject-${suggestion.id}`}
-						/>
-					</Card>
-				))
-			) : (
-				<p>No suggestions to moderate right now :{")"}</p>
-			)
-		}
+	<div>
+		<div class="flex flex-col gap-3">
+			<h2 class="text-xl font-bold">Suggestions</h2>
+			{
+				suggestions.length > 0 ? (
+					suggestions.map((suggestion) => (
+						<Card
+							title={suggestion.title}
+							subtitle={`Created ${extractDendrite(
+								suggestion.id,
+							).toLocaleString(
+								Astro.request.headers.get("accept-language")?.split(",")[0] ||
+									"en-US",
+								{
+									timeZone:
+										(Astro.locals.runtime?.cf?.timezone as string) ||
+										"America/New_York",
+									dateStyle: "short",
+								},
+							)}`}
+							set:html={suggestion.description}
+							id={`suggestion-${suggestion.id}`}
+						>
+							<Button
+								slot="actions"
+								type="Borderless"
+								class="text-green-400 bg-base-300 approveButton"
+								icon="i-ic:round-check"
+								id={`suggestion-approve-${suggestion.id}`}
+							/>
+							<Button
+								slot="actions"
+								type="Borderless"
+								class="text-red-400 bg-base-300 rejectButton"
+								icon="i-ic:round-close"
+								id={`suggestion-reject-${suggestion.id}`}
+							/>
+						</Card>
+					))
+				) : (
+					<p>No suggestions to moderate right now :{")"}</p>
+				)
+			}
+		</div>
+		<div class="flex flex-col gap-3">
+			<h2 class="text-xl font-bold">Comments</h2>
+			{
+				comments.length > 0 ? (
+					comments.map((comment) => (
+						<Card
+							subtitle={`Created ${extractDendrite(comment.id).toLocaleString(
+								Astro.request.headers.get("accept-language")?.split(",")[0] ||
+									"en-US",
+								{
+									timeZone:
+										(Astro.locals.runtime?.cf?.timezone as string) ||
+										"America/New_York",
+									dateStyle: "short",
+								},
+							)}`}
+							set:html={comment.description}
+							id={`comment-${comment.id}`}
+						>
+							<Button
+								slot="actions"
+								type="Borderless"
+								class="text-green-400 bg-base-300 approveButton"
+								icon="i-ic:round-check"
+								id={`comment-approve-${comment.id}`}
+							/>
+							<Button
+								slot="actions"
+								type="Borderless"
+								class="text-red-400 bg-base-300 rejectButton"
+								icon="i-ic:round-close"
+								id={`comment-reject-${comment.id}`}
+							/>
+						</Card>
+					))
+				) : (
+					<p>No comments to moderate right now :{")"}</p>
+				)
+			}
+		</div>
 	</div>
 </AdminLayout>
 <script>
 	for (const el of document.querySelectorAll(
 		".approveButton,.rejectButton",
 	) as NodeListOf<HTMLButtonElement>) {
-		const type = el.id.split("-")[0];
-		const id = el.id.split("-")[1];
+		const [parentType, type, id] = el.id.split("-");
 		el.addEventListener("click", async () => {
-			await fetch(`/api/moderation/${type}`, {
+			await fetch(`/api/${parentType}/moderation/${type}`, {
 				method: "POST",
 				body: id,
 			});
-			document.getElementById(`suggestion-${id}`)?.remove();
+			document.getElementById(`${parentType}-${id}`)?.remove();
 		});
 	}
 </script>

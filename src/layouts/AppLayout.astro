@@ -7,8 +7,9 @@ export interface Props {
 	userData?: UsersSelect;
 	minimumRole: UserRole;
 	id?: string;
+	signInRedirect?: string;
 }
-const { class: className, id } = Astro.props;
+const { class: className, id, signInRedirect } = Astro.props;
 let { userData } = Astro.props;
 ---
 
@@ -45,6 +46,15 @@ let { userData } = Astro.props;
 							<li class="px-3 text-center font-bold">
 								{userData.email.toUpperCase()}
 							</li>
+							<li>
+								<Button
+									href="/settings"
+									type="borderless"
+									class="place-content-center"
+								>
+									Settings
+								</Button>
+							</li>
 							{userData.role >= 10 && (
 								<li>
 									<Button
@@ -68,7 +78,12 @@ let { userData } = Astro.props;
 						</ul>
 					</details>
 				) : (
-					<Button type="tertiary" href="/api/auth/signin">
+					<Button
+						type="tertiary"
+						href={`/api/auth/signin?redirectURL=${encodeURIComponent(
+							signInRedirect || Astro.url.pathname,
+						)}`}
+					>
 						Sign in
 					</Button>
 				)

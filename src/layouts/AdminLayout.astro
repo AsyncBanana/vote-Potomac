@@ -6,11 +6,12 @@ const routes = {
 };
 export interface Props extends AppProps {
 	currentRoute: keyof typeof routes;
+	size?: "lg" | "md";
 }
 const { props } = Astro;
 ---
 
-<AppLayout {...props} class="w-main">
+<AppLayout {...props} class={props.size === "lg" ? "w-main-lg" : "w-main"}>
 	<div class="sm:flex flex-row gap-3 mb-3">
 		<h1 class="font-medium text-3xl">Admin Dashboard</h1>
 		<div class="tabs tabs-boxed w-max">

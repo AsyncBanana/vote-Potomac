@@ -1,0 +1,57 @@
+<mjml>
+	<mj-head>
+		<mj-title>Test</mj-title>
+		<mj-font
+			name="Inter"
+			href="https://fonts.googleapis.com/css?family=Inter"
+		></mj-font>
+	</mj-head>
+	<mj-body>
+		<mj-section padding-bottom="0px">
+			<mj-column vertical-align="middle" padding="0px">
+				<mj-image
+					width="75px"
+					src="https://votepotomac.com/favicon.ico"
+				></mj-image>
+			</mj-column>
+			<mj-column vertical-align="middle">
+				<mj-text
+					font-size="24px"
+					font-weight="700"
+					font-family="Inter, helvetica"
+					>Vote! Potomac</mj-text
+				>
+			</mj-column>
+		</mj-section>
+		<mj-section padding-top="0px">
+			<mj-column>
+				<mj-divider border-color="#ff6a00"></mj-divider>
+				<mj-text font-size="18px"
+					>Someone has replied to your suggestion with the following:</mj-text
+				>
+				<mj-text font-size="18px">{{source}}</mj-text>
+				<mj-button href="{{suggestionURL}}" background-color="#ff6a00"
+					>View</mj-button
+				>
+			</mj-column>
+		</mj-section>
+		<mj-section>
+			<mj-column>
+				<mj-image
+					width="25px"
+					padding-bottom="0px"
+					src="https://votepotomac.com/favicon.ico"
+					align="left"
+				></mj-image>
+				<mj-text font-family="helvetica" padding-bottom="0px"
+					><a href="https://votepotomac.com">Vote! Potomac</a></mj-text
+				>
+				<mj-text font-family="helvetica" padding-bottom="0px"
+					><a href="https://votepotomac.com/settings"
+						>Manage Notification Settings</a
+					></mj-text
+				>
+			</mj-column>
+		</mj-section>
+	</mj-body>
+</mjml>

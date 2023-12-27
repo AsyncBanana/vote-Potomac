@@ -18,14 +18,12 @@ const client = drizzle(
 		authToken: env.DATABASE_SECRET,
 	}),
 );
-if (process.env.REPLACE_FTS) {
-	await client.batch([
-		client.run(sql`DROP TRIGGER IF EXISTS suggestions_ai`),
-		client.run(sql`DROP TRIGGER IF EXISTS suggestions_ad`),
-		client.run(sql`DROP TRIGGER IF EXISTS suggestions_au`),
-		client.run(sql`DROP TABLE IF EXISTS suggestions_fts`),
-	]);
-}
+await client.batch([
+	client.run(sql`DROP TRIGGER IF EXISTS suggestions_ai`),
+	client.run(sql`DROP TRIGGER IF EXISTS suggestions_ad`),
+	client.run(sql`DROP TRIGGER IF EXISTS suggestions_au`),
+	client.run(sql`DROP TABLE IF EXISTS suggestions_fts`),
+]);
 await client.run(sql`CREATE VIRTUAL TABLE IF NOT EXISTS suggestions_fts USING fts5(
     title,
     votes UNINDEXED,
@@ -54,9 +52,7 @@ BEGIN
     VALUES (new.id, new.title, new.voteCount, new.votes);
 END;
 `),
-	process.env.REPLACE_FTS
-		? client.run(
-				sql`INSERT INTO suggestions_fts (rowid, title, voteCount, votes) SELECT id, title, voteCount, votes FROM ${Suggestions} WHERE true`,
-		  )
-		: null,
+	client.run(
+		sql`INSERT INTO suggestions_fts (rowid, title, voteCount, votes) SELECT id, title, voteCount, votes FROM ${Suggestions} WHERE true`,
+	),
 ]);

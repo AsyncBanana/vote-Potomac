@@ -55,5 +55,6 @@ export default defineConfig({
 	extractors: [extractSvelte()],
 	shortcuts: {
 		"w-main": "w-full px-6 max-w-3xl mx-auto",
+		"w-main-lg": "w-full px-6 max-w-7xl mx-auto",
 	},
 });

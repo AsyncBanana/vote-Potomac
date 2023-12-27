@@ -29,9 +29,12 @@ interface ImportMetaEnv {
 	readonly MAX_TITLE_LENGTH: number;
 	readonly MIN_DESCRIPTION_LENGTH: number;
 	readonly MAX_DESCRIPTION_LENGTH: number;
+	readonly MIN_COMMENT_LENGTH: number;
+	readonly MAX_COMMENT_LENGTH: number;
 	readonly GOOGLE_OAUTH_ID: string;
 	readonly GOOGLE_OAUTH_SECRET: string;
 	readonly AUTH_SECRET: string | { alg: "HS256"; kty: string; k: string };
+	readonly DKIM_PRIVATE_KEY: string;
 	readonly EPOCH: number;
 	readonly ORGANIZATION?: string;
 }
@@ -39,3 +42,7 @@ interface ImportMeta {
 	readonly env: import("astro/client").ImportMetaEnv;
 }
 type Runtime = import("@astrojs/cloudflare").AdvancedRuntime<ENV>;
+declare module "*.mjml" {
+	const template: string;
+	export default template;
+}

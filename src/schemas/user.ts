@@ -23,6 +23,15 @@ export const Users = sqliteTable(
 		familyName: text("lastName").notNull(),
 		givenName: text("firstName").notNull(),
 		name: text("name").notNull(),
+		moderationNotifications: integer("moderationNotifications", {
+			mode: "boolean",
+		}).default(true),
+		replyNotifications: integer("replyNotifications", {
+			mode: "boolean",
+		}).default(true),
+		voteNotifications: integer("voteNotifications", {
+			mode: "boolean",
+		}).default(false),
 	},
 	(table) => {
 		return {

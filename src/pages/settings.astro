@@ -1,0 +1,69 @@
+---
+import Button from "../components/Button.svelte";
+import AppLayout from "../layouts/AppLayout.astro";
+import { UserRole, type UsersSelect } from "../schemas/user";
+export const prerender = false;
+const res = await Astro.locals.handle({ minimumRole: UserRole.user });
+if (res.type === "error") return res.data;
+const {
+	data: { userData },
+} = res as { data: { userData: UsersSelect } };
+---
+
+<AppLayout {...res.data} class="w-main">
+	<h1 class="font-medium text-3xl">Settings</h1>
+	<div class="text-sm font-medium text-base-content text-opacity-60">
+		Signed in as
+	</div>
+	<div class="flex gap-3">
+		<img
+			referrerpolicy="no-referrer"
+			src={userData.picture}
+			class="w-12 h-12 aspect-square rounded-md b-2 b-base-200"
+		/>
+		<div class="flex flex-col">
+			<span class="font-bold">{userData.name}</span>
+			<span class="text-opacity-60 text-base-content text-sm font-medium">
+				{userData.email}
+			</span>
+		</div>
+		<Button href="/api/auth/signout" type="">Sign Out</Button>
+	</div>
+	<form
+		class="mt-3 form-control w-max"
+		method="POST"
+		action="/api/user/settings"
+	>
+		<h2 class="font-medium text-2xl">Notifications</h2>
+		<label class="label cursor-pointer flex gap-3">
+			<span class="label-text"
+				>When your suggestion passes through moderation</span
+			>
+			<input
+				type="checkbox"
+				class="toggle toggle-success"
+				name="moderationNotifications"
+				checked={userData.moderationNotifications ? "" : undefined}
+			/>
+		</label>
+		<label class="label cursor-pointer flex gap-3">
+			<span class="label-text">When someons replies to your suggestion</span>
+			<input
+				type="checkbox"
+				class="toggle toggle-success"
+				name="replyNotifications"
+				checked={userData.replyNotifications ? "" : undefined}
+			/>
+		</label>
+		<label class="label cursor-pointer flex gap-3">
+			<span class="label-text">When someone votes for your suggestion</span>
+			<input
+				type="checkbox"
+				class="toggle toggle-success"
+				name="voteNotifications"
+				checked={userData.voteNotifications ? "" : undefined}
+			/>
+		</label>
+		<Button class="w-max" action="submit">Save</Button>
+	</form>
+</AppLayout>

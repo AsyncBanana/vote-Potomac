@@ -43,7 +43,9 @@ const suggestions: PartialSuggestion[] =
 				.from(SuggestionsTable)
 				.limit(20)
 				.orderBy(
-					desc(sort === "top" ? SuggestionsTable.votes : SuggestionsTable.id),
+					desc(
+						sort === "top" ? SuggestionsTable.voteCount : SuggestionsTable.id,
+					),
 				)));
 const id =
 	Astro.props.userData?.id ||

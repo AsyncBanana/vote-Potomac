@@ -3,13 +3,14 @@ import unocss from "unocss/astro";
 import svelte from "@astrojs/svelte";
 import extractorSvelte from "@unocss/extractor-svelte";
 import cloudflare from "@astrojs/cloudflare";
+import mjml from "rollup-plugin-mjml-inline";
 
 // https://astro.build/config
 export default defineConfig({
 	integrations: [
 		unocss({
 			extractors: [extractorSvelte()],
-			injectReset: true,
+			injectReset: "@unocss/reset/tailwind-compat.css",
 		}),
 		svelte(),
 	],
@@ -24,6 +25,7 @@ export default defineConfig({
 				},
 			],
 		},
+		plugins: [mjml()],
 	},
 	output: "server",
 	adapter: cloudflare({
@@ -35,4 +37,5 @@ export default defineConfig({
 			entrypoint: "astro/assets/services/noop",
 		},
 	},
+	site: "https://votepotomac.com",
 });
