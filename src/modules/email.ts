@@ -43,6 +43,7 @@ interface Failure {
 export const sendEmail = async (
 	payload: MailSendBody,
 ): Promise<Success | Failure> => {
+	if (!import.meta.env.PROD) return { success: true };
 	if (!Array.isArray(payload.personalizations)) {
 		payload.personalizations = [payload.personalizations];
 	}

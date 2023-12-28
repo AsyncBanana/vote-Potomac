@@ -15,4 +15,5 @@ export default {
 		url: env.DATABASE_URL,
 		authToken: env.DATABASE_SECRET,
 	},
+	out: "migrations",
 };

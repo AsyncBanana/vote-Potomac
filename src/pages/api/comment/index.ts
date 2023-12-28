@@ -31,15 +31,13 @@ export const POST: APIRoute = async (ctx) => {
 		});
 	}
 	if (
-		description.length < import.meta.env.MIN_DESCRIPTION_LENGTH ||
-		description.length > import.meta.env.MAX_DESCRIPTION_LENGTH
+		description.length < import.meta.env.MIN_COMMENT_LENGTH ||
+		description.length > import.meta.env.MAX_COMMENT_LENGTH
 	) {
 		return new Response(
-			`Please make the title between ${import.meta.env.MIN_TITLE_LENGTH} and ${
-				import.meta.env.MAX_TITLE_LENGTH
-			} characters and the description between ${
-				import.meta.env.MIN_DESCRIPTION_LENGTH
-			} and ${import.meta.env.MAX_DESCRIPTION_LENGTH} characters`,
+			`Please make the comment between ${
+				import.meta.env.MIN_COMMENT_LENGTH
+			} and ${import.meta.env.MAX_COMMENT_LENGTH} characters`,
 			{
 				status: 400,
 			},
@@ -80,6 +78,8 @@ export const POST: APIRoute = async (ctx) => {
 			description,
 			author: userId,
 			parentId: +parentId,
+			votes: [userId],
+			voteCount: 1,
 		})
 		.run();
 	const expireDate = new Date();

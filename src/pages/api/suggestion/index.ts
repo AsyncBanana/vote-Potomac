@@ -78,6 +78,8 @@ export const POST: APIRoute = async (ctx) => {
 			title,
 			description,
 			author: userId,
+			votes: [userId],
+			voteCount: 1,
 		})
 		.run();
 	const expireDate = new Date();

@@ -1,10 +1,4 @@
-import {
-	customType,
-	index,
-	integer,
-	sqliteTable,
-	text,
-} from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { generateDendrite } from "../modules/dendrite";
 import { CSVArray, Suggestions } from "./suggestion";
 export const Comments = sqliteTable(
@@ -12,7 +6,7 @@ export const Comments = sqliteTable(
 	{
 		id: integer("id").primaryKey(),
 		parentId: integer("parentId")
-			.references(() => Suggestions.id)
+			.references(() => Suggestions.id, { onDelete: "cascade" })
 			.notNull(),
 		author: text("author").notNull(), // use id
 		description: text("description").notNull(),
@@ -35,7 +29,7 @@ export const Comments = sqliteTable(
 export const CommentQueue = sqliteTable("commentQueue", {
 	id: integer("id").primaryKey().$defaultFn(generateDendrite),
 	parentId: integer("parentId")
-		.references(() => Suggestions.id)
+		.references(() => Suggestions.id, { onDelete: "cascade" })
 		.notNull(),
 	author: text("author").notNull(), // use id
 	description: text("description").notNull(),

@@ -1,6 +1,6 @@
 <mjml>
 	<mj-head>
-		<mj-title>Your suggestion has been voted for</mj-title>
+		<mj-title>Your {{type}} has been voted for</mj-title>
 		<mj-font
 			name="Inter"
 			href="https://fonts.googleapis.com/css?family=Inter"
@@ -27,12 +27,9 @@
 			<mj-column>
 				<mj-divider border-color="#ff6a00"></mj-divider>
 				<mj-text font-size="18px"
-					>Your suggestion "{{title}}" has been voted for!</mj-text
+					>Your {{type}} "{{title}}" has been voted for!</mj-text
 				>
 				<mj-text font-size="18px">It currently has {{votes}} votes</mj-text>
-				<mj-button href="{{suggestionURL}}" background-color="#ff6a00"
-					>View Suggestion</mj-button
-				>
 			</mj-column>
 		</mj-section>
 		<mj-section>
