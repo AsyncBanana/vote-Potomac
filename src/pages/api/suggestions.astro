@@ -5,6 +5,7 @@ import { SuggestionsFTS } from "../../schemas/fts";
 import Suggestion from "../../components/Suggestion.astro";
 import type { Users } from "../../schemas/user";
 import { verifyJWT } from "../../modules/auth";
+import Button from "../../components/Button.svelte";
 interface PartialSuggestion {
 	id: number;
 	voteCount: number | null;
@@ -16,9 +17,11 @@ export interface Props {
 	userData?: InferSelectModel<typeof Users>;
 	query?: string;
 	sort?: "top" | "recent";
+	offset?: number;
 }
 const query = Astro.props.query || Astro.url.searchParams.get("q");
 const sort = Astro.props.sort || Astro.url.searchParams.get("sort");
+const offset = Astro.props.offset || Astro.url.searchParams.get("offset");
 const suggestions: PartialSuggestion[] =
 	Astro.props.suggestions ||
 	(await (query
@@ -31,7 +34,8 @@ const suggestions: PartialSuggestion[] =
 				})
 				.from(SuggestionsFTS)
 				.where(sql`${SuggestionsFTS.title} MATCH ${query}`)
-				.limit(20)
+				.offset(+(offset || 0)) // Could prevent scan of results by implementing offset using votes/date
+				.limit(30)
 				.orderBy(sql`rank`)
 		: Astro.locals.db
 				.select({
@@ -41,7 +45,8 @@ const suggestions: PartialSuggestion[] =
 					votes: SuggestionsTable.votes,
 				})
 				.from(SuggestionsTable)
-				.limit(20)
+				.limit(30)
+				.offset(+(offset || 0))
 				.orderBy(
 					desc(
 						sort === "top" ? SuggestionsTable.voteCount : SuggestionsTable.id,
@@ -50,20 +55,28 @@ const suggestions: PartialSuggestion[] =
 const id =
 	Astro.props.userData?.id ||
 	(await verifyJWT(Astro.cookies.get("authData")?.value));
+if (suggestions.length === 0) {
+	return new Response("No suggestions found", { status: 404 });
+}
 export const partial = true;
 ---
 
 {
-	suggestions.length > 0 ? (
-		suggestions.map((suggestion) => (
-			<Suggestion
-				title={suggestion.title}
-				votes={suggestion?.voteCount || 0}
-				id={suggestion.id}
-				hasVoted={!!id && suggestion.votes?.includes(id)}
-			/>
-		))
+	suggestions.map((suggestion) => (
+		<Suggestion
+			title={suggestion.title}
+			votes={suggestion?.voteCount || 0}
+			id={suggestion.id}
+			hasVoted={!!id && suggestion.votes?.includes(id)}
+		/>
+	))
+}
+{
+	suggestions.length === 30 ? (
+		<Button type="secondary" onclick="loadComments(this)">
+			Load More Suggestions
+		</Button>
 	) : (
-		<p class="text-center">No suggestions found</p>
+		""
 	)
 }

@@ -228,7 +228,6 @@ if (res.type === "error") return res.data;
 	) as HTMLDialogElement;
 	for (const vote of voteBtns) {
 		const voteText = vote.querySelector("#text") as HTMLSpanElement;
-		console.log(voteText);
 		const [_, type, contentId] = vote.id.split("-");
 		vote.addEventListener("click", async () => {
 			if (vote.classList.contains("btn-outline")) {

@@ -18,28 +18,28 @@
 		"studio:prod": "NODE_ENV=production drizzle-kit studio"
 	},
 	"dependencies": {
-		"@astrojs/cloudflare": "^8.0.0",
+		"@astrojs/cloudflare": "^9.0.1",
 		"@astrojs/svelte": "^5.0.3",
-		"@libsql/client": "^0.3.6",
-		"@tsndr/cloudflare-worker-jwt": "^2.3.2",
-		"astro": "^4.0.8",
-		"drizzle-orm": "^0.29.2",
+		"@libsql/client": "^0.5.1",
+		"@tsndr/cloudflare-worker-jwt": "^2.5.1",
+		"astro": "^4.4.4",
+		"drizzle-orm": "^0.29.4",
 		"snarkdown": "^2.0.0",
-		"svelte": "^4.2.8",
+		"svelte": "^4.2.12",
 		"xss": "^1.0.14"
 	},
 	"devDependencies": {
-		"@iconify/json": "^2.2.162",
-		"@unocss/extractor-svelte": "^0.58.2",
-		"@unocss/reset": "^0.58.2",
+		"@iconify/json": "^2.2.186",
+		"@unocss/extractor-svelte": "^0.58.5",
+		"@unocss/reset": "^0.58.5",
 		"daisyui": "3.9.4",
-		"dotenv": "^16.3.1",
-		"drizzle-kit": "^0.20.9",
-		"prettier": "^3.1.1",
-		"prettier-plugin-astro": "^0.12.3",
+		"dotenv": "^16.4.5",
+		"drizzle-kit": "^0.20.14",
+		"prettier": "^3.2.5",
+		"prettier-plugin-astro": "^0.13.0",
 		"rollup-plugin-mjml-inline": "^1.0.0",
-		"unocss": "^0.58.1",
+		"unocss": "^0.58.5",
 		"unocss-preset-daisy": "^7.0.0",
-		"wrangler": "^3.22.1"
+		"wrangler": "^3.29.0"
 	}
 }

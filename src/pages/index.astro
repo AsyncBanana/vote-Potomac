@@ -27,7 +27,7 @@ const [suggestions, userData] = await Astro.locals.db.batch([
 				})
 				.from(SuggestionsFTS)
 				.where(sql`${SuggestionsFTS.title} MATCH ${query}`)
-				.limit(20)
+				.limit(30)
 				.orderBy(sql`rank`)
 		: Astro.locals.db
 				.select({
@@ -37,7 +37,7 @@ const [suggestions, userData] = await Astro.locals.db.batch([
 					votes: Suggestions.votes,
 				})
 				.from(Suggestions)
-				.limit(20)
+				.limit(30)
 				.orderBy(
 					desc(sortOrder === "top" ? Suggestions.voteCount : Suggestions.id),
 				),
@@ -47,7 +47,7 @@ const [suggestions, userData] = await Astro.locals.db.batch([
 					.select()
 					.from(Users)
 					.where(eq(Users.id, id || "")),
-		  ]
+			]
 		: []), // the lengths I go to avoid naming things
 ]);
 const res = await Astro.locals.handle(
@@ -148,4 +148,12 @@ if (notification) {
 	sortEl.addEventListener("change", async (e) => {
 		await querySearch();
 	});
+	let offset = 30;
+	// @ts-expect-error trust guys not using a js framework was a great idea
+	window.loadComments = async (button: HTMLButtonElement) => {
+		button.remove();
+		const res = await fetch(`/api/suggestions?offset=${offset}`);
+		offset += 30; // if the suggestion count is not 30, this will not matter
+		suggestions.insertAdjacentHTML("beforeend", await res.text());
+	};
 </script>
