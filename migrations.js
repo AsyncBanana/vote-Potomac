@@ -8,9 +8,11 @@ import { Suggestions } from "./src/schemas/suggestion.ts";
 import { config } from "dotenv";
 const { parsed: env } = config({
 	path:
-		process.env.NODE_ENV === "production"
-			? "./.env.production"
-			: "./.env.development",
+		process.env.TARGET_ENV === "IS"
+			? "./.env.is"
+			: process.env.NODE_ENV === "production"
+				? "./.env.production"
+				: "./.env.development",
 });
 const client = drizzle(
 	createClient({

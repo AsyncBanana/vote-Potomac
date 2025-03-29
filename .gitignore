@@ -16,9 +16,8 @@ pnpm-debug.log*
 
 # environment variables
 .dev.vars
-.env
-.env.production
-.env.development
+.env.*
+!.env.example
 
 pnpm-lock.yaml
 main.db

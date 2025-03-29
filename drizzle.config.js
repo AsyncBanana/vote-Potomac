@@ -2,9 +2,11 @@ import { config } from "dotenv";
 
 const { parsed: env } = config({
 	path:
-		process.env.NODE_ENV === "production"
-			? "./.env.production"
-			: "./.env.development",
+		process.env.TARGET_ENV === "IS"
+			? "./.env.is"
+			: process.env.NODE_ENV === "production"
+				? "./.env.production"
+				: "./.env.development",
 });
 /** @type { import("drizzle-kit").Config } */
 export default {
