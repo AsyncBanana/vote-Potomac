@@ -6,11 +6,10 @@ const { parsed: env } = config({
 			? "./.dev.vars"
 			: "./.env.development",
 });
-
 /** @type { import("drizzle-kit").Config } */
 export default {
 	schema: "./src/schemas/!(fts)*.ts",
-	driver: process.env.NODE_ENV === "production" ? "turso" : "libsql",
+	dialect: process.env.NODE_ENV === "production" ? "turso" : "sqlite",
 	dbCredentials: {
 		url: env.DATABASE_URL,
 		authToken: env.DATABASE_SECRET,

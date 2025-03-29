@@ -54,18 +54,34 @@ if (res.type === "error") return res.data;
 ---
 
 <AppLayout {...res.data} class="w-main">
-	<header class="flex flex-row gap-3 grow items-stretch">
-		<Button
-			type={userId && suggestion.votes?.includes(userId)
-				? "primary"
-				: "tertiary"}
-			class="h-auto vote-btn"
-			icon="i-bx:upvote"
-			id={`vote-suggestion-${suggestion.id}`}
-			vertical
-		>
-			{suggestion.votes?.length || 0}
-		</Button>
+	<header class="flex flex-row gap-3 grow place-items-center">
+		<div class="grid grid-rows-2 gap-1">
+			<Button
+				type={userId && suggestion.votes?.includes(userId)
+					? "primary"
+					: "tertiary"}
+				class="vote-btn h-8 min-h-8"
+				square={false}
+				icon="i-bx:upvote"
+				id={`vote-suggestion-${suggestion.id}-up`}
+				vertical
+				ariaLabel="Vote for suggestion"
+			/>
+			<Button
+				type={userId && suggestion.downvotes?.includes(userId)
+					? "primary"
+					: "tertiary"}
+				class="vote-btn h-8 min-h-8"
+				icon="i-bx:downvote"
+				square={false}
+				id={`vote-suggestion-${suggestion.id}-down`}
+				vertical
+				ariaLabel="Vote against suggestion"
+			/>
+		</div>
+		<div class="text-3xl font-bold" id={`text-suggestion-${suggestion.id}`}>
+			{suggestion.voteCount || 0}
+		</div>
 		<div>
 			<h1 class="text-3xl font-bold text-balance">
 				{suggestion.title}
@@ -80,7 +96,7 @@ if (res.type === "error") return res.data;
 								(Astro.locals.runtime?.cf?.timezone as string) ||
 								"America/New_York",
 							dateStyle: "short",
-						},
+						}
 					)
 				}
 			</div>
@@ -120,7 +136,7 @@ if (res.type === "error") return res.data;
 			<Button
 				type="secondary"
 				href={`/api/auth/signin?redirectURL=${encodeURIComponent(
-					Astro.url.pathname,
+					Astro.url.pathname
 				)}`}
 			>
 				Sign in to comment
@@ -133,22 +149,40 @@ if (res.type === "error") return res.data;
 				{comments.map((comment) => (
 					<div>
 						<div class="flex items-center gap-3">
-							<Button
-								type={
-									!!userId && comment.votes?.includes(userId)
-										? "primary"
-										: "tertiary"
-								}
-								class="h-auto aspect-square vote-btn"
-								icon="i-bx:upvote"
-								id={`vote-comment-${comment.id}`}
-								vertical
-							>
+							<div class="grid grid-rows-2 gap-1">
+								<Button
+									type={
+										userId && comment.votes?.includes(userId)
+											? "primary"
+											: "tertiary"
+									}
+									class="vote-btn h-8 min-h-8"
+									square={false}
+									icon="i-bx:upvote"
+									id={`vote-comment-${comment.id}-up`}
+									vertical
+									ariaLabel="Vote for comment"
+								/>
+								<Button
+									type={
+										userId && comment.downvotes?.includes(userId)
+											? "primary"
+											: "tertiary"
+									}
+									class="vote-btn h-8 min-h-8"
+									icon="i-bx:downvote"
+									square={false}
+									id={`vote-comment-${comment.id}-down`}
+									vertical
+									ariaLabel="Vote against comment"
+								/>
+							</div>
+							<div class="text-3xl font-bold" id={`text-comment-${comment.id}`}>
 								{comment.voteCount || 0}
-							</Button>
+							</div>
 							<h2 class="text-opacity-90 text-base-content font-medium text-lg">
 								Created{" "}
-								{extractDendrite(suggestion.id).toLocaleString(
+								{extractDendrite(comment.id).toLocaleString(
 									Astro.request.headers.get("accept-language")?.split(",")[0] ||
 										"en-US",
 									{
@@ -156,7 +190,7 @@ if (res.type === "error") return res.data;
 											(Astro.locals.runtime?.cf?.timezone as string) ||
 											"America/New_York",
 										dateStyle: "short",
-									},
+									}
 								)}
 							</h2>
 							{(comment.author === userId ||
@@ -185,6 +219,15 @@ if (res.type === "error") return res.data;
 				<Suggestion
 					title={suggestion.title}
 					votes={suggestion?.voteCount || 0}
+					vote={
+						userId
+							? suggestion.votes?.includes(userId)
+								? "up"
+								: suggestion.downvotes?.includes(userId)
+									? "down"
+									: undefined
+							: undefined
+					}
 					id={suggestion.id}
 				/>
 			))
@@ -215,34 +258,71 @@ if (res.type === "error") return res.data;
 <script>
 	const voteBtns = Array.from(
 		document.getElementsByClassName(
-			"vote-btn",
-		) as HTMLCollectionOf<HTMLButtonElement>,
+			"vote-btn"
+		) as HTMLCollectionOf<HTMLButtonElement>
 	);
 	const deletionBtns = Array.from(
 		document.getElementsByClassName(
-			"delete-btn",
-		) as HTMLCollectionOf<HTMLButtonElement>,
+			"delete-btn"
+		) as HTMLCollectionOf<HTMLButtonElement>
 	);
 	const deletionModal = document.getElementById(
-		"deletionModal",
+		"deletionModal"
 	) as HTMLDialogElement;
-	for (const vote of voteBtns) {
-		const voteText = vote.querySelector("#text") as HTMLSpanElement;
-		const [_, type, contentId] = vote.id.split("-");
-		vote.addEventListener("click", async () => {
-			if (vote.classList.contains("btn-outline")) {
+	const voteBtnsAggregated = {
+		comment: {} as Record<string, [HTMLButtonElement, HTMLButtonElement]>,
+		suggestion: {} as Record<string, [HTMLButtonElement, HTMLButtonElement]>,
+	};
+	for (const voteBtn of voteBtns) {
+		const [_, type, contentId, vote] = voteBtn.id.split("-") as [
+			"vote-suggestion",
+			"suggestion" | "comment",
+			string,
+			"up" | "down",
+		];
+
+		const voteText = document.querySelector(
+			`#text-${type}-${contentId}`
+		) as HTMLSpanElement;
+		if (!(contentId in voteBtnsAggregated[type])) {
+			// @ts-expect-error too lazy to change types
+			voteBtnsAggregated[type][contentId] = [];
+		}
+		voteBtnsAggregated[type][contentId][vote === "up" ? 1 : 0] = voteBtn;
+		voteBtn.addEventListener("click", async () => {
+			if (voteBtn.classList.contains("btn-outline")) {
 				const res = await fetch(`/api/${type}/vote`, {
 					method: "POST",
-					body: contentId,
+					body: JSON.stringify({
+						id: contentId,
+						vote,
+					}),
 				});
 				if (res.status === 401) {
 					document.location.assign(
 						`/api/auth/signin?redirectURL=${encodeURIComponent(
-							document.location.href,
-						)}`,
+							document.location.href
+						)}`
 					);
 				}
-				voteText.innerText = (+vote.innerText + 1).toString();
+				voteText.innerText = (
+					+voteText.innerText + (vote === "up" ? 1 : -1)
+				).toString();
+				if (
+					voteBtnsAggregated[type][contentId][
+						vote === "up" ? 0 : 1
+					].classList.contains("btn-primary")
+				) {
+					voteBtnsAggregated[type][contentId][
+						vote === "up" ? 0 : 1
+					].classList.remove("btn-primary");
+					voteBtnsAggregated[type][contentId][
+						vote === "up" ? 0 : 1
+					].classList.add("btn-outline");
+					voteText.innerText = (
+						+voteText.innerText + (vote === "up" ? 1 : -1)
+					).toString();
+				}
 			} else {
 				const res = await fetch(`/api/${type}/unvote`, {
 					method: "POST",
@@ -251,25 +331,27 @@ if (res.type === "error") return res.data;
 				if (res.status === 401) {
 					document.location.assign(
 						`/api/auth/signin?redirectURL=${encodeURIComponent(
-							document.location.href,
-						)}`,
+							document.location.href
+						)}`
 					);
 				}
-				voteText.innerText = (+vote.innerText - 1).toString();
+				voteText.innerText = (
+					+voteText.innerText - (vote === "up" ? 1 : -1)
+				).toString();
 			}
-			vote.classList.toggle("btn-outline");
-			vote.classList.toggle("btn-primary");
+			voteBtn.classList.toggle("btn-outline");
+			voteBtn.classList.toggle("btn-primary");
 		});
 	}
 	if (deletionBtns.length > 0) {
 		const deletionModalDeleteBtn = document.getElementById(
-			"deletionModal-deleteBtn",
+			"deletionModal-deleteBtn"
 		) as HTMLButtonElement;
 		const deletionModalDesc = document.getElementById(
-			"deletionModal-desc",
+			"deletionModal-desc"
 		) as HTMLParagraphElement;
 		const deletionModalTitle = document.getElementById(
-			"deletionModal-title",
+			"deletionModal-title"
 		) as HTMLHeadingElement;
 		deletionModal.addEventListener("close", async () => {
 			if (deletionModal.returnValue.startsWith("delete-")) {
@@ -294,7 +376,7 @@ if (res.type === "error") return res.data;
 		});
 	}
 	const commentForm = document.getElementById(
-		"commentInput",
+		"commentInput"
 	) as HTMLFormElement;
 	commentForm?.addEventListener("submit", async (e) => {
 		e.preventDefault();

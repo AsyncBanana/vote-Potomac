@@ -3,6 +3,7 @@ import { SuggestionQueue } from "../../../schemas/suggestion";
 import snarkdown from "snarkdown";
 import xss from "xss";
 import { verifyJWT } from "../../../modules/auth";
+import { sql } from "drizzle-orm";
 export const POST: APIRoute = async (ctx) => {
 	const authData = ctx.cookies.get("authData")?.value;
 	const userId = authData && (await verifyJWT(authData));
@@ -79,7 +80,6 @@ export const POST: APIRoute = async (ctx) => {
 			description,
 			author: userId,
 			votes: [userId],
-			voteCount: 1,
 		})
 		.run();
 	const expireDate = new Date();

@@ -2,15 +2,15 @@
 import { desc, sql, type InferSelectModel } from "drizzle-orm";
 import { Suggestions as SuggestionsTable } from "../../schemas/suggestion";
 import { SuggestionsFTS } from "../../schemas/fts";
-import Suggestion from "../../components/Suggestion.astro";
 import type { Users } from "../../schemas/user";
 import { verifyJWT } from "../../modules/auth";
-import Button from "../../components/Button.svelte";
+import SuggestionsViewer from "../../components/SuggestionsViewer.astro";
 interface PartialSuggestion {
 	id: number;
 	voteCount: number | null;
 	title: string;
 	votes: string[] | null;
+	downvotes: string[] | null;
 }
 export interface Props {
 	suggestions?: PartialSuggestion[];
@@ -31,6 +31,7 @@ const suggestions: PartialSuggestion[] =
 					title: SuggestionsFTS.title,
 					voteCount: SuggestionsFTS.voteCount,
 					votes: SuggestionsFTS.votes,
+					downvotes: SuggestionsFTS.downvotes,
 				})
 				.from(SuggestionsFTS)
 				.where(sql`${SuggestionsFTS.title} MATCH ${query}`)
@@ -43,14 +44,15 @@ const suggestions: PartialSuggestion[] =
 					title: SuggestionsTable.title,
 					voteCount: SuggestionsTable.voteCount,
 					votes: SuggestionsTable.votes,
+					downvotes: SuggestionsFTS.downvotes,
 				})
 				.from(SuggestionsTable)
 				.limit(30)
 				.offset(+(offset || 0))
 				.orderBy(
 					desc(
-						sort === "top" ? SuggestionsTable.voteCount : SuggestionsTable.id,
-					),
+						sort === "top" ? SuggestionsTable.voteCount : SuggestionsTable.id
+					)
 				)));
 const id =
 	Astro.props.userData?.id ||
@@ -61,22 +63,8 @@ if (suggestions.length === 0) {
 export const partial = true;
 ---
 
-{
-	suggestions.map((suggestion) => (
-		<Suggestion
-			title={suggestion.title}
-			votes={suggestion?.voteCount || 0}
-			id={suggestion.id}
-			hasVoted={!!id && suggestion.votes?.includes(id)}
-		/>
-	))
-}
-{
-	suggestions.length === 30 ? (
-		<Button type="secondary" onclick="loadComments(this)">
-			Load More Suggestions
-		</Button>
-	) : (
-		""
-	)
-}
+<SuggestionsViewer
+	suggestions={suggestions}
+	id={id}
+	loadAdditional={suggestions.length === 30}
+/>

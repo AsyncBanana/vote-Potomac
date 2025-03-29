@@ -38,7 +38,7 @@ export const POST: APIRoute = async (ctx) => {
 			}[],
 		];
 		if (res.users.moderationNotifications) {
-			ctx.locals.runtime.waitUntil(
+			ctx.locals.runtime.ctx.waitUntil(
 				sendEmail({
 					from: {
 						email: "notifications@votepotomac.com",
@@ -83,7 +83,7 @@ export const POST: APIRoute = async (ctx) => {
 			}[],
 		];
 		if (res.users.moderationNotifications) {
-			ctx.locals.runtime.waitUntil(
+			ctx.locals.runtime.ctx.waitUntil(
 				sendEmail({
 					from: {
 						email: "notifications@votepotomac.com",
@@ -116,7 +116,7 @@ export const POST: APIRoute = async (ctx) => {
 			);
 		}
 		if (type === "comment") {
-			ctx.locals.runtime.waitUntil(
+			ctx.locals.runtime.ctx.waitUntil(
 				(async () => {
 					// could put in above batch, but that is kind of a pain
 					const parentAuthor = await ctx.locals.db

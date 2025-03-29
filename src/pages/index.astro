@@ -7,7 +7,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import Button from "../components/Button.svelte";
 import { notifications } from "../modules/notification";
 import { SuggestionsFTS } from "../schemas/fts";
-import SuggestionsView from "./api/suggestions.astro";
+import SuggestionsViewer from "../components/SuggestionsViewer.astro";
 export const prerender = false;
 let id;
 const authData = Astro.cookies.get("authData")?.value;
@@ -24,6 +24,7 @@ const [suggestions, userData] = await Astro.locals.db.batch([
 					title: SuggestionsFTS.title,
 					voteCount: SuggestionsFTS.voteCount,
 					votes: SuggestionsFTS.votes,
+					downvotes: SuggestionsFTS.downvotes,
 				})
 				.from(SuggestionsFTS)
 				.where(sql`${SuggestionsFTS.title} MATCH ${query}`)
@@ -35,11 +36,12 @@ const [suggestions, userData] = await Astro.locals.db.batch([
 					title: Suggestions.title,
 					voteCount: Suggestions.voteCount,
 					votes: Suggestions.votes,
+					downvotes: Suggestions.downvotes,
 				})
 				.from(Suggestions)
 				.limit(30)
 				.orderBy(
-					desc(sortOrder === "top" ? Suggestions.voteCount : Suggestions.id),
+					desc(sortOrder === "top" ? Suggestions.voteCount : Suggestions.id)
 				),
 	...(id
 		? [
@@ -51,7 +53,7 @@ const [suggestions, userData] = await Astro.locals.db.batch([
 		: []), // the lengths I go to avoid naming things
 ]);
 const res = await Astro.locals.handle(
-	userData ? { userData: userData[0] } : {},
+	userData ? { userData: userData[0] } : {}
 );
 if (res.type === "error") return res.data;
 const notification = Astro.cookies.get("notification")?.value as
@@ -73,7 +75,8 @@ if (notification) {
 						<Button
 							type="tertiary"
 							icon="i-ic:round-close"
-							onclick="document.getElementById('notification').remove()"
+							on:click={() => document.getElementById("notification")?.remove()}
+							client:load
 						/>
 					</div>
 				</div>
@@ -99,9 +102,10 @@ if (notification) {
 		</select>
 
 		<div id="suggestions" class="flex flex-col gap-3">
-			<SuggestionsView
-				userData={userData && userData[0]}
+			<SuggestionsViewer
+				id={userData?.[0]?.id}
 				suggestions={suggestions}
+				loadAdditional={suggestions.length === 30}
 			/>
 		</div>
 	</div>
@@ -110,7 +114,7 @@ if (notification) {
 	async function querySearch(
 		q: string = search.value,
 		sort: string = sortEl.options[sortEl.selectedIndex].value,
-		pushstate: boolean = true,
+		pushstate: boolean = true
 	) {
 		const queryParams = new URLSearchParams();
 		if (q) queryParams.append("q", q);
@@ -118,24 +122,28 @@ if (notification) {
 		const res = await fetch(
 			`/api/suggestions/${
 				queryParams.size > 0 ? `?${queryParams.toString()}` : ""
-			}`,
+			}`
 		);
+		if (res.status === 404) {
+			suggestions.innerHTML = "No suggestions found :(";
+			return;
+		}
 		if (!res.ok) return;
 		suggestions.innerHTML = await res.text();
 		if (pushstate)
 			history.pushState(
 				{ q, sort },
 				"",
-				queryParams.size > 0 ? `/?${queryParams.toString()}` : "/",
+				queryParams.size > 0 ? `/?${queryParams.toString()}` : "/"
 			);
 	}
 	let searchFunc: NodeJS.Timeout;
 	const search = document.getElementById(
-		"suggestionSearch",
+		"suggestionSearch"
 	) as HTMLInputElement;
 	const suggestions = document.getElementById("suggestions") as HTMLDivElement;
 	const sortEl = document.getElementById(
-		"sort",
+		"sort"
 	) as unknown as HTMLSelectElement;
 	search.addEventListener("input", (e) => {
 		if (searchFunc) clearTimeout(searchFunc);

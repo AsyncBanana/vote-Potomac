@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { Suggestions } from "../../../schemas/suggestion";
 import { verifyJWT } from "../../../modules/auth";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, or, sql } from "drizzle-orm";
 import { Comments } from "../../../schemas/comment";
 export const POST: APIRoute = async (ctx) => {
 	const { type } = ctx.params;
@@ -23,13 +23,16 @@ export const POST: APIRoute = async (ctx) => {
 	const res = await ctx.locals.db
 		.update(contentTable)
 		.set({
-			votes: sql`replace(${contentTable.votes},${userId}||",","")`,
-			voteCount: sql`${contentTable.voteCount}-1`,
+			votes: sql`replace(${contentTable.votes}, ${userId} || ',', '')`,
+			downvotes: sql`replace(${contentTable.votes}, ${userId} || ',', '')`,
 		})
 		.where(
 			and(
 				eq(contentTable.id, contentId),
-				sql`instr(${contentTable.votes},${userId})`,
+				or(
+					sql`instr(${contentTable.votes},${userId})`,
+					sql`instr(${contentTable.downvotes},${userId})`,
+				),
 			),
 		)
 		.run();

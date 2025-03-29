@@ -1,3 +1,4 @@
+/// <reference path="../.astro/types.d.ts" />
 /// <reference types="astro/client" />
 declare namespace App {
 	interface Locals extends Runtime {
@@ -41,7 +42,7 @@ interface ImportMetaEnv {
 interface ImportMeta {
 	readonly env: import("astro/client").ImportMetaEnv;
 }
-type Runtime = import("@astrojs/cloudflare").AdvancedRuntime<ENV>;
+type Runtime = import("@astrojs/cloudflare").Runtime<ENV>;
 declare module "*.mjml" {
 	const template: string;
 	export default template;

@@ -1,4 +1,4 @@
-<script script lang="ts">
+<script lang="ts">
 	export let href: string | undefined = undefined;
 	export let type:
 		| "primary"
@@ -18,7 +18,6 @@
 	export let autofocus = false;
 	export let icon: string = "";
 	export let vertical: boolean = false;
-	export let onclick = undefined;
 	export let value: string = "";
 	let className = "";
 	export { className as class };
@@ -48,10 +47,9 @@
 	{autofocus}
 	{href}
 	{title}
-	{onclick}
 	{value}
 	{id}
 	>{#if icon}<span
 			class="{icon} h-6 w-6 {$$slots.default && !vertical ? 'mr-1' : ''}"
-		/>{/if}{#if $$slots.default}<span id="text"><slot /></span>{/if}
+		></span>{/if}{#if $$slots.default}<span id="text"><slot /></span>{/if}
 </svelte:element>

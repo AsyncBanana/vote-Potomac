@@ -1,6 +1,7 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { generateDendrite } from "../modules/dendrite";
 import { CSVArray, Suggestions } from "./suggestion";
+import { type SQL, sql } from "drizzle-orm";
 export const Comments = sqliteTable(
 	"comments",
 	{
@@ -10,9 +11,13 @@ export const Comments = sqliteTable(
 			.notNull(),
 		author: text("author").notNull(), // use id
 		description: text("description").notNull(),
-		votes: CSVArray("votes"),
-		// change to generated column `VoteCount()` when drizzle is fixed
-		voteCount: integer("voteCount").default(0),
+		votes: CSVArray("votes").default([]),
+		downvotes: CSVArray("downvotes").default([]),
+		voteCount: integer("voteCount").generatedAlwaysAs(
+			(): SQL =>
+				sql`length(${Comments.votes})-length(replace(${Comments.votes}, ',', ''))-length(${Comments.downvotes})+length(replace(${Comments.downvotes}, ',', ''))`,
+			{ mode: "stored" },
+		),
 	},
 	(table) => {
 		return {
@@ -21,6 +26,7 @@ export const Comments = sqliteTable(
 				table.id,
 				table.description,
 				table.votes,
+				table.downvotes,
 				table.voteCount,
 			), // used for listing pages
 		};
@@ -33,7 +39,7 @@ export const CommentQueue = sqliteTable("commentQueue", {
 		.notNull(),
 	author: text("author").notNull(), // use id
 	description: text("description").notNull(),
-	votes: CSVArray("votes"),
-	voteCount: integer("voteCount").default(0),
+	votes: CSVArray("votes").default([]),
+	downvotes: CSVArray("downvotes").default([]),
 });
 export type CommentQueueSelect = typeof CommentQueue.$inferSelect;

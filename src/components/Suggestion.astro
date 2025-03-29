@@ -3,10 +3,10 @@ import Button from "./Button.svelte";
 interface Props {
 	title: string;
 	votes: number;
-	hasVoted?: boolean;
+	vote?: "up" | "down";
 	id: number;
 }
-const { title, votes, id, hasVoted } = Astro.props;
+const { title, votes, id, vote } = Astro.props;
 ---
 
 <a
@@ -14,9 +14,9 @@ const { title, votes, id, hasVoted } = Astro.props;
 	href={`/suggestion/${id}`}
 >
 	<Button
-		type={hasVoted ? "primary" : "tertiary"}
+		type={vote ? "primary" : "tertiary"}
 		nonInteractive
-		icon="i-bx:upvote"
+		icon={vote === "down" ? "i-bx:downvote" : "i-bx:upvote"}
 	>
 		{votes}
 	</Button>

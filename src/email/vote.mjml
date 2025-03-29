@@ -26,9 +26,7 @@
 		<mj-section padding-top="0px">
 			<mj-column>
 				<mj-divider border-color="#ff6a00"></mj-divider>
-				<mj-text font-size="18px"
-					>Your {{type}} "{{title}}" has been voted for!</mj-text
-				>
+				<mj-text font-size="18px">{{message}}</mj-text>
 				<mj-text font-size="18px">It currently has {{votes}} votes</mj-text>
 			</mj-column>
 		</mj-section>

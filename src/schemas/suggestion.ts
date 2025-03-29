@@ -6,7 +6,7 @@ import {
 	text,
 } from "drizzle-orm/sqlite-core";
 import { generateDendrite } from "../modules/dendrite";
-import type { InferSelectModel } from "drizzle-orm";
+import { sql, type InferSelectModel, type SQL } from "drizzle-orm";
 export const CSVArray = customType<{
 	data: string[];
 	driverData: string;
@@ -18,15 +18,7 @@ export const CSVArray = customType<{
 		return value.split(",").filter((val) => val /* only truthy values */);
 	},
 	toDriver(value: string[]): string {
-		return value.join(",") + ",";
-	},
-});
-export const VoteCount = customType<{
-	data: number;
-	driverData: number;
-}>({
-	dataType() {
-		return `INT GENERATED ALWAYS as (LENGTH(votes) - LENGTH(REPLACE(votes, ',', ''))) STORED`;
+		return value.join(",") + (value.length > 0 ? "," : "");
 	},
 });
 export const Suggestions = sqliteTable(
@@ -36,9 +28,13 @@ export const Suggestions = sqliteTable(
 		author: text("author").notNull(), // use id
 		title: text("title").notNull(),
 		description: text("description").notNull(),
-		votes: CSVArray("votes"),
-		// change to generated column `VoteCount()` when drizzle is fixed
-		voteCount: integer("voteCount").default(0),
+		votes: CSVArray("votes").default([]),
+		downvotes: CSVArray("downvotes").default([]),
+		voteCount: integer("voteCount").generatedAlwaysAs(
+			(): SQL =>
+				sql`length(${Suggestions.votes})-length(replace(${Suggestions.votes}, ',', ''))-length(${Suggestions.downvotes})+length(replace(${Suggestions.downvotes}, ',', ''))`,
+			{ mode: "stored" },
+		),
 	},
 	(table) => {
 		return {
@@ -46,6 +42,7 @@ export const Suggestions = sqliteTable(
 				table.title,
 				table.voteCount,
 				table.votes,
+				table.downvotes,
 				table.id,
 			), // used for listing pages
 		};
@@ -56,7 +53,7 @@ export const SuggestionQueue = sqliteTable("suggestionQueue", {
 	author: text("author").notNull(), // use id
 	title: text("title").notNull(),
 	description: text("description").notNull(),
-	votes: CSVArray("votes"),
-	voteCount: integer("voteCount").default(0),
+	votes: CSVArray("votes").default([]),
+	downvotes: CSVArray("downvotes").default([]),
 });
 export type SuggestionQueueSelect = InferSelectModel<typeof SuggestionQueue>;

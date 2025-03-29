@@ -1,0 +1,46 @@
+---
+import Suggestion from "./Suggestion.astro";
+import Button from "./Button.svelte";
+
+export interface PartialSuggestion {
+	id: number;
+	voteCount: number | null;
+	title: string;
+	votes: string[] | null;
+	downvotes: string[] | null;
+}
+export interface Props {
+	suggestions: PartialSuggestion[];
+	id?: string;
+	loadAdditional?: boolean;
+}
+const { suggestions, id, loadAdditional } = Astro.props;
+---
+
+{
+	suggestions.map((suggestion) => (
+		<Suggestion
+			title={suggestion.title}
+			votes={suggestion?.voteCount || 0}
+			id={suggestion.id}
+			vote={
+				id
+					? suggestion.votes?.includes(id)
+						? "up"
+						: suggestion.downvotes?.includes(id)
+							? "down"
+							: undefined
+					: undefined
+			}
+		/>
+	))
+}
+{
+	loadAdditional ? (
+		<Button type="secondary" onclick="loadComments(this)">
+			Load More Suggestions
+		</Button>
+	) : (
+		""
+	)
+}

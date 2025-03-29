@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, passthroughImageService } from "astro/config";
 import unocss from "unocss/astro";
 import svelte from "@astrojs/svelte";
 import extractorSvelte from "@unocss/extractor-svelte";
@@ -29,13 +29,13 @@ export default defineConfig({
 	},
 	output: "server",
 	adapter: cloudflare({
-		runtime: { mode: "local" },
+		platformProxy: {
+			enabled: true,
+		},
+		imageService: "passthrough",
 	}),
 	image: {
-		service: {
-			config: {},
-			entrypoint: "astro/assets/services/noop",
-		},
+		service: passthroughImageService(),
 	},
 	site: "https://votepotomac.com",
 });

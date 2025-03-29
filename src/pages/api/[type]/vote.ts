@@ -17,25 +17,38 @@ export const POST: APIRoute = async (ctx) => {
 			status: 401,
 		});
 	}
-	const contentId = +(await ctx.request.text());
+	const { id: contentId, vote } = (await ctx.request.json()) as {
+		id: number;
+		vote: "up" | "down";
+	};
 	if (isNaN(contentId))
 		return new Response("Content ID not provided or invalid number", {
 			status: 400,
 		});
+	if (vote !== "up" && vote !== "down") {
+	}
 	const contentTable = type === "suggestion" ? Suggestions : Comments;
 	const [[res], [authorData]] = await ctx.locals.db.batch([
 		ctx.locals.db
 			.update(contentTable)
 			.set({
-				votes: sql`(coalesce(${contentTable.votes},"") || ${userId} || ",")`,
-				voteCount: sql`${contentTable.voteCount}+1`,
+				votes:
+					vote == "up"
+						? sql`(coalesce(${contentTable.votes},'') || ${userId} || ',')`
+						: sql`replace(${contentTable.votes}, ${userId} || ',', '')`,
+				downvotes:
+					vote == "down"
+						? sql`(coalesce(${contentTable.downvotes},'') || ${userId} || ',')`
+						: sql`replace(${contentTable.downvotes}, ${userId} || ',', '')`,
 			})
 			.where(
 				and(
 					eq(contentTable.id, contentId),
 					or(
 						isNull(contentTable.votes),
-						not(sql`instr(${contentTable.votes},${userId})`),
+						vote === "up"
+							? not(sql`instr(${contentTable.votes},${userId})`)
+							: not(sql`instr(${contentTable.downvotes},${userId})`),
 					),
 				),
 			)
@@ -58,7 +71,7 @@ export const POST: APIRoute = async (ctx) => {
 			),
 	]);
 	if (res && authorData.voteNotifications) {
-		ctx.locals.runtime.waitUntil(
+		ctx.locals.runtime.ctx.waitUntil(
 			sendEmail({
 				from: {
 					email: "notifications@votepotomac.com",
@@ -67,13 +80,18 @@ export const POST: APIRoute = async (ctx) => {
 				personalizations: {
 					to: [{ name: authorData.name, email: authorData.email }],
 				},
-				subject: `Your ${type} has been voted for!`,
+				subject:
+					vote === "up"
+						? `Your ${type} has been voted for!`
+						: `Your ${type} has been downvoted`,
 				content: [
 					{
 						type: "text/html",
 						value: VoteTemplate.replaceAll(
-							"{{title}}",
-							res.title /* differences between comments and suggestions handled above */,
+							"{{message}}",
+							vote === "up"
+								? `Your ${type} "${res.title}" has been voted for!`
+								: `Your ${type} "${res.title}" has been downvoted`,
 						)
 							.replaceAll("{{votes}}", (res.voteCount || 0).toString())
 							.replaceAll("{{type}}", type),
