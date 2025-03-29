@@ -5,7 +5,8 @@ import xss from "xss";
 import { verifyJWT } from "../../../modules/auth";
 export const POST: APIRoute = async (ctx) => {
 	const authData = ctx.cookies.get("authData")?.value;
-	const userId = authData && (await verifyJWT(authData));
+	const userId =
+		authData && (await verifyJWT(ctx.locals.runtime.env, authData));
 	if (!userId) {
 		return new Response("Not signed in", {
 			status: 401,
@@ -79,7 +80,6 @@ export const POST: APIRoute = async (ctx) => {
 			author: userId,
 			parentId: +parentId,
 			votes: [userId],
-			voteCount: 1,
 		})
 		.run();
 	const expireDate = new Date();

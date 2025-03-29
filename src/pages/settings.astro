@@ -43,7 +43,7 @@ const {
 				type="checkbox"
 				class="toggle toggle-success"
 				name="moderationNotifications"
-				checked={userData.moderationNotifications ? "" : undefined}
+				checked={userData.moderationNotifications ? true : undefined}
 			/>
 		</label>
 		<label class="label cursor-pointer flex gap-3">
@@ -52,7 +52,7 @@ const {
 				type="checkbox"
 				class="toggle toggle-success"
 				name="replyNotifications"
-				checked={userData.replyNotifications ? "" : undefined}
+				checked={userData.replyNotifications ? true : undefined}
 			/>
 		</label>
 		<label class="label cursor-pointer flex gap-3">
@@ -61,7 +61,7 @@ const {
 				type="checkbox"
 				class="toggle toggle-success"
 				name="voteNotifications"
-				checked={userData.voteNotifications ? "" : undefined}
+				checked={userData.voteNotifications ? true : undefined}
 			/>
 		</label>
 		<Button class="w-max" action="submit">Save</Button>

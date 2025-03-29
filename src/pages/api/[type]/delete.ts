@@ -10,7 +10,8 @@ export const POST: APIRoute = async (ctx) => {
 	if (type !== "comment" && type !== "suggestion")
 		return new Response("Not found", { status: 404 });
 	const authData = ctx.cookies.get("authData")?.value;
-	const userId = authData && (await verifyJWT(authData));
+	const userId =
+		authData && (await verifyJWT(ctx.locals.runtime.env, authData));
 	if (!userId) {
 		return new Response("Not signed in", {
 			status: 401,

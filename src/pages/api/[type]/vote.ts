@@ -11,7 +11,8 @@ export const POST: APIRoute = async (ctx) => {
 	if (type !== "comment" && type !== "suggestion")
 		return new Response("Not found", { status: 404 });
 	const authData = ctx.cookies.get("authData")?.value;
-	const userId = authData && (await verifyJWT(authData));
+	const userId =
+		authData && (await verifyJWT(ctx.locals.runtime.env, authData));
 	if (!userId) {
 		return new Response("Not signed in", {
 			status: 401,
@@ -72,34 +73,35 @@ export const POST: APIRoute = async (ctx) => {
 	]);
 	if (res && authorData.voteNotifications) {
 		ctx.locals.runtime.ctx.waitUntil(
-			sendEmail({
-				from: {
-					email: "notifications@votepotomac.com",
-					name: "Votepotomac Notifications",
-				},
-				personalizations: {
-					to: [{ name: authorData.name, email: authorData.email }],
-				},
-				subject:
-					vote === "up"
-						? `Your ${type} has been voted for!`
-						: `Your ${type} has been downvoted`,
-				content: [
-					{
-						type: "text/html",
-						value: VoteTemplate.replaceAll(
-							"{{message}}",
-							vote === "up"
-								? `Your ${type} "${res.title}" has been voted for!`
-								: `Your ${type} "${res.title}" has been downvoted`,
-						)
-							.replaceAll("{{votes}}", (res.voteCount || 0).toString())
-							.replaceAll("{{type}}", type),
+			sendEmail(
+				{
+					from: {
+						email: "notifications@votepotomac.com",
+						name: "Votepotomac Notifications",
 					},
-				],
-			}).then((res) =>
-				res.success === false ? console.error(res.errors) : "",
-			),
+					personalizations: {
+						to: [{ name: authorData.name, email: authorData.email }],
+					},
+					subject:
+						vote === "up"
+							? `Your ${type} has been voted for!`
+							: `Your ${type} has been downvoted`,
+					content: [
+						{
+							type: "text/html",
+							value: VoteTemplate.replaceAll(
+								"{{message}}",
+								vote === "up"
+									? `Your ${type} "${res.title}" has been voted for!`
+									: `Your ${type} "${res.title}" has been downvoted`,
+							)
+								.replaceAll("{{votes}}", (res.voteCount || 0).toString())
+								.replaceAll("{{type}}", type),
+						},
+					],
+				},
+				ctx.locals.runtime.env,
+			).then((res) => (res.success === false ? console.error(res.errors) : "")),
 		);
 	}
 	return new Response("Successfully voted for content");

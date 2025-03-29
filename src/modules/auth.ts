@@ -33,26 +33,33 @@ interface TokenErrorResponse {
 	error: string;
 }
 /*#__PURE__*/
-export function generateOAuthURL(callbackURL: string): [URL, string] {
+export function generateOAuthURL(
+	callbackURL: string,
+	env: ImportMetaEnv,
+): [URL, string] {
 	const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
 	const state = crypto.randomUUID();
 	url.search = new URLSearchParams({
-		client_id: import.meta.env.GOOGLE_OAUTH_ID,
+		client_id: env.GOOGLE_OAUTH_ID,
 		redirect_uri: callbackURL,
 		response_type: "code",
 		scope: "openid email profile",
 		access_type: "online",
 		state: state,
-		hd: import.meta.env.ORGANIZATION || "",
+		hd: env.ORGANIZATION || "",
 	}).toString();
 	return [url, state];
 }
-export async function exchangeToken(code: string, callbackURL: string) {
+export async function exchangeToken(
+	code: string,
+	callbackURL: string,
+	env: ImportMetaEnv,
+) {
 	// probably shouldn't hardcode the url
 	const res = await fetch(
 		`https://oauth2.googleapis.com/token?${new URLSearchParams({
-			client_id: import.meta.env.GOOGLE_OAUTH_ID,
-			client_secret: import.meta.env.GOOGLE_OAUTH_SECRET,
+			client_id: env.GOOGLE_OAUTH_ID,
+			client_secret: env.GOOGLE_OAUTH_SECRET,
 			code,
 			redirect_uri: callbackURL,
 			grant_type: "authorization_code",
@@ -65,9 +72,12 @@ export async function exchangeToken(code: string, callbackURL: string) {
 	}
 	return json;
 }
-export async function verifyJWT(token?: string): Promise<undefined | string> {
+export async function verifyJWT(
+	env: ImportMetaEnv,
+	token?: string,
+): Promise<undefined | string> {
 	if (!token) return;
-	if (!(await verify(token, import.meta.env.AUTH_SECRET))) {
+	if (!(await verify(token, env.AUTH_SECRET))) {
 		return;
 	}
 	const decodedToken = decode(token).payload as JWT;

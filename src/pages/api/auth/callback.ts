@@ -21,7 +21,11 @@ export const GET: APIRoute = async (ctx) => {
 		});
 	}
 
-	const res = await exchangeToken(code, ctx.url.origin + "/api/auth/callback");
+	const res = await exchangeToken(
+		code,
+		ctx.url.origin + "/api/auth/callback",
+		ctx.locals.runtime.env,
+	);
 	const token = decode(res.id_token).payload as GoogleOauthToken;
 	if (!token)
 		return new Response("Invalid JWT", {
@@ -31,10 +35,13 @@ export const GET: APIRoute = async (ctx) => {
 		return new Response("Please verify your email", {
 			status: 403,
 		});
-	if (import.meta.env.ORGANIZATION && token.hd !== import.meta.env.ORGANIZATION)
+	if (
+		ctx.locals.runtime.env.ORGANIZATION &&
+		token.hd !== ctx.locals.runtime.env.ORGANIZATION
+	)
 		return new Response(
 			`Invalid organization; Please sign in with a ${
-				import.meta.env.ORGANIZATION
+				ctx.locals.runtime.env.ORGANIZATION
 			} account`,
 			{
 				status: 403,
@@ -69,12 +76,12 @@ export const GET: APIRoute = async (ctx) => {
 			sub: user.id,
 			exp: token.exp,
 		} satisfies JWT,
-		import.meta.env.AUTH_SECRET,
+		ctx.locals.runtime.env.AUTH_SECRET,
 	);
 	ctx.cookies.set("authData", jwt, {
 		path: "/",
 		httpOnly: true,
-		secure: import.meta.env.PROD,
+		secure: ctx.locals.runtime.env.PROD,
 		sameSite: "lax",
 		expires: new Date(token.exp * 1000),
 	});

@@ -15,7 +15,9 @@
 		"migrate:local": "drizzle-kit push",
 		"migrate:prod": "NODE_ENV=production drizzle-kit push && NODE_ENV=production bun run ./migrations.js",
 		"studio:local": "drizzle-kit studio",
-		"studio:prod": "NODE_ENV=production drizzle-kit studio"
+		"studio:prod": "NODE_ENV=production drizzle-kit studio",
+		"env:prod": "cp .env.production .dev.vars",
+		"env:local": "cp .env.development .dev.vars"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^12.3.1",

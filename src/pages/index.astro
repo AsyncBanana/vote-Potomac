@@ -12,7 +12,7 @@ export const prerender = false;
 let id;
 const authData = Astro.cookies.get("authData")?.value;
 if (authData) {
-	id = await verifyJWT(authData);
+	id = await verifyJWT(Astro.locals.runtime.env, authData);
 }
 const query = Astro.url.searchParams.get("q");
 const sortOrder = Astro.url.searchParams.get("sort") || "top";

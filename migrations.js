@@ -9,7 +9,7 @@ import { config } from "dotenv";
 const { parsed: env } = config({
 	path:
 		process.env.NODE_ENV === "production"
-			? "./.dev.vars"
+			? "./.env.production"
 			: "./.env.development",
 });
 const client = drizzle(

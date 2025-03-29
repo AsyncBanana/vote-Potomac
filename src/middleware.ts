@@ -1,14 +1,15 @@
 import { generateOAuthURL, verifyJWT } from "./modules/auth";
 import getDB from "./modules/db";
-import type { MiddlewareResponseHandler } from "astro";
 import { UserRole, Users } from "./schemas/user";
 import { eq } from "drizzle-orm";
 import type { Props as AppLayoutProps } from "./layouts/AppLayout.astro";
-export const onRequest: MiddlewareResponseHandler = (ctx, next) => {
-	[ctx.locals.db, ctx.locals.rawdb] = getDB();
-	ctx.locals.login = (finalRedirectUrl) => {
+import { defineMiddleware } from "astro:middleware";
+export const onRequest = defineMiddleware((ctx, next) => {
+	[ctx.locals.db, ctx.locals.rawdb] = getDB(ctx.locals.runtime.env);
+	ctx.locals.login = (finalRedirectUrl?: string) => {
 		const [redirectURL, state] = generateOAuthURL(
 			ctx.url.origin + "/api/auth/callback",
+			ctx.locals.runtime.env,
 		);
 		ctx.cookies.set(`authState`, state, {
 			secure: import.meta.env.PROD,
@@ -30,7 +31,7 @@ export const onRequest: MiddlewareResponseHandler = (ctx, next) => {
 	ctx.locals.getSession = async () => {
 		const authData = ctx.cookies.get("authData")?.value;
 		if (!authData) return;
-		const id = await verifyJWT(authData);
+		const id = await verifyJWT(ctx.locals.runtime.env, authData);
 		if (!id) return;
 		return ctx.locals.db.select().from(Users).where(eq(Users.id, id)).get();
 	};
@@ -58,4 +59,4 @@ export const onRequest: MiddlewareResponseHandler = (ctx, next) => {
 		};
 	};
 	return next();
-};
+});

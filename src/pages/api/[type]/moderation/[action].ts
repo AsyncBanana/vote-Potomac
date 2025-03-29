@@ -39,27 +39,30 @@ export const POST: APIRoute = async (ctx) => {
 		];
 		if (res.users.moderationNotifications) {
 			ctx.locals.runtime.ctx.waitUntil(
-				sendEmail({
-					from: {
-						email: "notifications@votepotomac.com",
-						name: "Votepotomac Notifications",
-					},
-					personalizations: {
-						to: [{ name: res.users.name, email: res.users.email }],
-					},
-					subject: `Your ${type} has been rejected`,
-					content: [
-						{
-							type: "text/html",
-							value: RejectionTemplate.replaceAll(
-								"{{title}}",
-								type === "suggestion"
-									? res.suggestionQueue.title
-									: res.commentQueue.description,
-							),
+				sendEmail(
+					{
+						from: {
+							email: "notifications@votepotomac.com",
+							name: "Votepotomac Notifications",
 						},
-					],
-				}).then((res) =>
+						personalizations: {
+							to: [{ name: res.users.name, email: res.users.email }],
+						},
+						subject: `Your ${type} has been rejected`,
+						content: [
+							{
+								type: "text/html",
+								value: RejectionTemplate.replaceAll(
+									"{{title}}",
+									type === "suggestion"
+										? res.suggestionQueue.title
+										: res.commentQueue.description,
+								),
+							},
+						],
+					},
+					ctx.locals.runtime.env,
+				).then((res) =>
 					res.success === false ? console.error(res.errors) : "",
 				),
 			);
@@ -84,33 +87,36 @@ export const POST: APIRoute = async (ctx) => {
 		];
 		if (res.users.moderationNotifications) {
 			ctx.locals.runtime.ctx.waitUntil(
-				sendEmail({
-					from: {
-						email: "notifications@votepotomac.com",
-						name: "Votepotomac Notifications",
-					},
-					personalizations: {
-						to: [{ name: res.users.name, email: res.users.email }],
-					},
-					subject: `Your ${type} has been approved!`,
-					content: [
-						{
-							type: "text/html",
-							value: ApprovalTemplate.replaceAll(
-								"{{title}}",
-								type === "suggestion"
-									? res.suggestionQueue.title
-									: res.commentQueue.description,
-							).replaceAll(
-								"{{suggestionURL}}",
-								ctx.site +
-									`suggestion/${
-										type === "suggestion" ? id : res.commentQueue.parentId
-									}`,
-							),
+				sendEmail(
+					{
+						from: {
+							email: "notifications@votepotomac.com",
+							name: "Votepotomac Notifications",
 						},
-					],
-				}).then((res) =>
+						personalizations: {
+							to: [{ name: res.users.name, email: res.users.email }],
+						},
+						subject: `Your ${type} has been approved!`,
+						content: [
+							{
+								type: "text/html",
+								value: ApprovalTemplate.replaceAll(
+									"{{title}}",
+									type === "suggestion"
+										? res.suggestionQueue.title
+										: res.commentQueue.description,
+								).replaceAll(
+									"{{suggestionURL}}",
+									ctx.site +
+										`suggestion/${
+											type === "suggestion" ? id : res.commentQueue.parentId
+										}`,
+								),
+							},
+						],
+					},
+					ctx.locals.runtime.env,
+				).then((res) =>
 					res.success === false ? console.error(res.errors) : "",
 				),
 			);
@@ -130,28 +136,31 @@ export const POST: APIRoute = async (ctx) => {
 						)
 						.get();
 					if (!parentAuthor?.replyNotifications) return;
-					const emailRes = await sendEmail({
-						from: {
-							email: "notifications@votepotomac.com",
-							name: "Votepotomac Notifications",
-						},
-						personalizations: {
-							to: [{ name: parentAuthor.name, email: parentAuthor.email }],
-						},
-						subject: `Someone has replied to your suggestion`,
-						content: [
-							{
-								type: "text/html",
-								value: ReplyTemplate.replaceAll(
-									"{{source}}",
-									res.commentQueue.description,
-								).replaceAll(
-									"{{suggestionURL}}",
-									ctx.site + `suggestion/${res.commentQueue.parentId}`,
-								),
+					const emailRes = await sendEmail(
+						{
+							from: {
+								email: "notifications@votepotomac.com",
+								name: "Votepotomac Notifications",
 							},
-						],
-					});
+							personalizations: {
+								to: [{ name: parentAuthor.name, email: parentAuthor.email }],
+							},
+							subject: `Someone has replied to your suggestion`,
+							content: [
+								{
+									type: "text/html",
+									value: ReplyTemplate.replaceAll(
+										"{{source}}",
+										res.commentQueue.description,
+									).replaceAll(
+										"{{suggestionURL}}",
+										ctx.site + `suggestion/${res.commentQueue.parentId}`,
+									),
+								},
+							],
+						},
+						ctx.locals.runtime.env,
+					);
 					if (!emailRes.success) console.error(emailRes.errors);
 				})(),
 			);

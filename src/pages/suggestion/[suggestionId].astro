@@ -15,7 +15,7 @@ let userId: string | undefined;
 const authData = Astro.cookies.get("authData")?.value;
 if (!id) return new Response("Not found", { status: 404 });
 if (authData) {
-	userId = await verifyJWT(authData);
+	userId = await verifyJWT(Astro.locals.runtime.env, authData);
 }
 const [[suggestion], suggestions, comments, userDataRaw] =
 	await Astro.locals.db.batch([

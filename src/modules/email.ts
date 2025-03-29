@@ -42,6 +42,7 @@ interface Failure {
 
 export const sendEmail = async (
 	payload: MailSendBody,
+	env: ImportMetaEnv,
 ): Promise<Success | Failure> => {
 	if (!import.meta.env.PROD) return { success: true };
 	if (!Array.isArray(payload.personalizations)) {
@@ -51,7 +52,7 @@ export const sendEmail = async (
 		{
 			dkim_domain: "votepotomac.com",
 			dkim_selector: "mail",
-			dkim_private_key: import.meta.env.DKIM_PRIVATE_KEY,
+			dkim_private_key: env.DKIM_PRIVATE_KEY,
 			...payload.personalizations[0],
 		},
 	];

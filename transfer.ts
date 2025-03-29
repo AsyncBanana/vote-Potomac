@@ -7,7 +7,7 @@ import { Comments } from "./src/schemas/comment.ts";
 const { parsed: env } = config({
 	path:
 		process.env.NODE_ENV === "production"
-			? "./.dev.vars"
+			? "./.env.production"
 			: "./.env.development",
 });
 if (!env) throw new Error("No env loaded");

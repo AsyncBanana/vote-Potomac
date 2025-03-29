@@ -42,7 +42,7 @@ interface ImportMetaEnv {
 interface ImportMeta {
 	readonly env: import("astro/client").ImportMetaEnv;
 }
-type Runtime = import("@astrojs/cloudflare").Runtime<ENV>;
+type Runtime = import("@astrojs/cloudflare").Runtime<ImportMetaEnv>;
 declare module "*.mjml" {
 	const template: string;
 	export default template;

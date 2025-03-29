@@ -56,7 +56,10 @@ const suggestions: PartialSuggestion[] =
 				)));
 const id =
 	Astro.props.userData?.id ||
-	(await verifyJWT(Astro.cookies.get("authData")?.value));
+	(await verifyJWT(
+		Astro.locals.runtime.env,
+		Astro.cookies.get("authData")?.value
+	));
 if (suggestions.length === 0) {
 	return new Response("No suggestions found", { status: 404 });
 }
