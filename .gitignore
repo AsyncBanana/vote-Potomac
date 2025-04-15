@@ -24,3 +24,5 @@ main.db
 
 # macOS-specific files
 .DS_Store
+
+worker-configuration.d.ts

@@ -27,6 +27,7 @@
 		"@tsndr/cloudflare-worker-jwt": "^3.1.4",
 		"astro": "^5.5.5",
 		"drizzle-orm": "^0.41.0",
+		"plausible-tracker": "^0.3.9",
 		"snarkdown": "^2.0.0",
 		"svelte": "^5.25.3",
 		"xss": "^1.0.15"
