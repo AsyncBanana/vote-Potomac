@@ -1,3 +1,3 @@
 # Vote! Potomac
 
-This is the in-progress suggestion and voting system for The Potomac School.
+This is the [suggestion and voting system](https://votepotomac.com) for The Potomac School SGA.

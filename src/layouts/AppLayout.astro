@@ -1,19 +1,26 @@
 ---
 import { UserRole, type UsersSelect } from "../schemas/user";
-import BaseLayout from "./BaseLayout.astro";
+import BaseLayout, { type Props as BaseProps } from "./BaseLayout.astro";
 import Button from "../components/Button.svelte";
-export interface Props {
+export interface Props extends BaseProps {
 	class?: string;
 	userData?: UsersSelect;
 	minimumRole: UserRole;
 	id?: string;
 	signInRedirect?: string;
 }
-const { class: className, id, signInRedirect } = Astro.props;
+const {
+	class: className,
+	id,
+	signInRedirect,
+	title,
+	description,
+	noindex,
+} = Astro.props;
 let { userData } = Astro.props;
 ---
 
-<BaseLayout class={className} {id}>
+<BaseLayout class={className} {id} {title} {description} {noindex}>
 	<div class="h-3"></div>
 	<div
 		class="flex flex-col gap-3 mb-3 md:flex-row md:w-main place-content-center"
@@ -81,7 +88,7 @@ let { userData } = Astro.props;
 					<Button
 						type="tertiary"
 						href={`/api/auth/signin?redirectURL=${encodeURIComponent(
-							signInRedirect || Astro.url.pathname,
+							signInRedirect || Astro.url.pathname
 						)}`}
 					>
 						Sign in

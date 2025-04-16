@@ -15,7 +15,7 @@ const [suggestions, comments] = await Astro.locals.db.batch([
 ]);
 ---
 
-<AdminLayout {...res.data} currentRoute="Moderation">
+<AdminLayout {...res.data} currentRoute="Moderation" noindex>
 	<div>
 		<div class="flex flex-col gap-3">
 			<h2 class="text-xl font-bold">Suggestions</h2>
@@ -25,7 +25,7 @@ const [suggestions, comments] = await Astro.locals.db.batch([
 						<Card
 							title={suggestion.title}
 							subtitle={`Created ${extractDendrite(
-								suggestion.id,
+								suggestion.id
 							).toLocaleString(
 								Astro.request.headers.get("accept-language")?.split(",")[0] ||
 									"en-US",
@@ -34,7 +34,7 @@ const [suggestions, comments] = await Astro.locals.db.batch([
 										(Astro.locals.runtime?.cf?.timezone as string) ||
 										"America/New_York",
 									dateStyle: "short",
-								},
+								}
 							)}`}
 							set:html={suggestion.description}
 							id={`suggestion-${suggestion.id}`}
@@ -74,7 +74,7 @@ const [suggestions, comments] = await Astro.locals.db.batch([
 										(Astro.locals.runtime?.cf?.timezone as string) ||
 										"America/New_York",
 									dateStyle: "short",
-								},
+								}
 							)}`}
 							set:html={comment.description}
 							id={`comment-${comment.id}`}
@@ -104,7 +104,7 @@ const [suggestions, comments] = await Astro.locals.db.batch([
 </AdminLayout>
 <script>
 	for (const el of document.querySelectorAll(
-		".approveButton,.rejectButton",
+		".approveButton,.rejectButton"
 	) as NodeListOf<HTMLButtonElement>) {
 		const [parentType, type, id] = el.id.split("-");
 		el.addEventListener("click", async () => {

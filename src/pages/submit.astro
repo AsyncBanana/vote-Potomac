@@ -8,7 +8,11 @@ const res = await Astro.locals.handle({ minimumRole: UserRole.user });
 if (res.type === "error") return res.data;
 ---
 
-<AppLayout {...res.data} class="w-main">
+<AppLayout
+	{...res.data}
+	class="w-main"
+	title="Submit a suggestion | Vote! Potomac"
+>
 	<h1 class="font-medium text-3xl">Submit suggestion</h1>
 	<form
 		class="form-control flex"

@@ -53,7 +53,15 @@ const canDelete =
 if (res.type === "error") return res.data;
 ---
 
-<AppLayout {...res.data} class="w-main">
+<AppLayout
+	{...res.data}
+	class="w-main"
+	description={(suggestion.description.length > 160
+		? suggestion.description.substring(0, 157) + "..."
+		: suggestion.description
+	).replace("\n", " ")}
+	title={`${suggestion.title.length > 45 ? suggestion.title.substring(0, 45) + "..." : suggestion.title} | Vote! Potomac`}
+>
 	<header class="flex flex-row gap-3 grow place-items-center">
 		<div class="grid grid-rows-2 gap-1">
 			<Button
