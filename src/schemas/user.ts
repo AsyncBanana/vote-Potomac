@@ -1,4 +1,3 @@
-import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { index, integer } from "drizzle-orm/sqlite-core";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const enum UserRole {
@@ -45,5 +44,5 @@ export const Users = sqliteTable(
 		};
 	},
 );
-export type UsersSelect = InferSelectModel<typeof Users>;
-export type UsersInsert = InferInsertModel<typeof Users>;
+export type UsersSelect = typeof Users.$inferSelect;
+export type UsersInsert = typeof Users.$inferInsert;

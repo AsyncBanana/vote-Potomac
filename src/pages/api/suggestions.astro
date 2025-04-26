@@ -1,8 +1,8 @@
 ---
-import { desc, sql, type InferSelectModel } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import { Suggestions as SuggestionsTable } from "../../schemas/suggestion";
 import { SuggestionsFTS } from "../../schemas/fts";
-import type { Users } from "../../schemas/user";
+import type { Users, UsersSelect } from "../../schemas/user";
 import { verifyJWT } from "../../modules/auth";
 import SuggestionsViewer from "../../components/SuggestionsViewer.astro";
 interface PartialSuggestion {
@@ -14,7 +14,7 @@ interface PartialSuggestion {
 }
 export interface Props {
 	suggestions?: PartialSuggestion[];
-	userData?: InferSelectModel<typeof Users>;
+	userData?: UsersSelect;
 	query?: string;
 	sort?: "top" | "recent";
 	offset?: number;

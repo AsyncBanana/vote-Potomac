@@ -6,7 +6,7 @@ import {
 	text,
 } from "drizzle-orm/sqlite-core";
 import { generateDendrite } from "../modules/dendrite";
-import { sql, type InferSelectModel, type SQL } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
 export const CSVArray = customType<{
 	data: string[];
 	driverData: string;
@@ -56,4 +56,4 @@ export const SuggestionQueue = sqliteTable("suggestionQueue", {
 	votes: CSVArray("votes").default([]),
 	downvotes: CSVArray("downvotes").default([]),
 });
-export type SuggestionQueueSelect = InferSelectModel<typeof SuggestionQueue>;
+export type SuggestionQueueSelect = typeof SuggestionQueue.$inferSelect;

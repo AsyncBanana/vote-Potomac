@@ -1,4 +1,6 @@
 name = "votepotomac"
 workers_dev = false
-compatibility_date = "2025-03-28"
-main = "dist/_worker.js"
+compatibility_date = "2025-04-26"
+main = "./dist/_worker.js"
+[assets]
+directory = "./dist"
