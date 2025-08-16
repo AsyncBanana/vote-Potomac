@@ -1,8 +1,9 @@
 import type { APIRoute } from "astro";
-import { CommentQueue } from "../../../schemas/comment";
+import { Comments } from "../../../schemas/comment";
 import snarkdown from "snarkdown";
 import xss from "xss";
 import { verifyJWT } from "../../../modules/auth";
+import { ContentStatus } from "../../../types/SharedContent";
 export const POST: APIRoute = async (ctx) => {
 	const authData = ctx.cookies.get("authData")?.value;
 	const userId =
@@ -74,12 +75,13 @@ export const POST: APIRoute = async (ctx) => {
 		stripIgnoreTagBody: ["script", "style"],
 	});
 	const res = await ctx.locals.db
-		.insert(CommentQueue)
+		.insert(Comments)
 		.values({
 			description,
 			author: userId,
 			parentId: +parentId,
 			votes: [userId],
+			status: ContentStatus.ModerationQueue,
 		})
 		.run();
 	const expireDate = new Date();

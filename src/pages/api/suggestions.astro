@@ -1,10 +1,11 @@
 ---
-import { desc, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { Suggestions as SuggestionsTable } from "../../schemas/suggestion";
 import { SuggestionsFTS } from "../../schemas/fts";
 import type { Users, UsersSelect } from "../../schemas/user";
 import { verifyJWT } from "../../modules/auth";
 import SuggestionsViewer from "../../components/SuggestionsViewer.astro";
+import { ContentStatus } from "../../types/SharedContent";
 interface PartialSuggestion {
 	id: number;
 	voteCount: number | null;
@@ -47,6 +48,7 @@ const suggestions: PartialSuggestion[] =
 					downvotes: SuggestionsTable.downvotes,
 				})
 				.from(SuggestionsTable)
+				.where(eq(SuggestionsTable.status, ContentStatus.Active))
 				.limit(30)
 				.offset(+(offset || 0))
 				.orderBy(

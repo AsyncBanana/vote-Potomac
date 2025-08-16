@@ -1,20 +1,13 @@
 import type { APIRoute } from "astro";
-import {
-	SuggestionQueue,
-	Suggestions,
-	type SuggestionQueueSelect,
-} from "../../../../schemas/suggestion";
+import { Suggestions } from "../../../../schemas/suggestion";
 import { and, eq, sql } from "drizzle-orm";
-import {
-	CommentQueue,
-	Comments,
-	type CommentQueueSelect,
-} from "../../../../schemas/comment";
+import { Comments } from "../../../../schemas/comment";
 import ApprovalTemplate from "../../../../email/approval.mjml";
 import RejectionTemplate from "../../../../email/rejection.mjml";
 import ReplyTemplate from "../../../../email/reply.mjml";
-import { Users, type UsersSelect } from "../../../../schemas/user";
+import { Users } from "../../../../schemas/user";
 import { sendEmail } from "../../../../modules/email";
+import { ContentStatus } from "../../../../types/SharedContent";
 export const POST: APIRoute = async (ctx) => {
 	const { type } = ctx.params;
 	if (type !== "comment" && type !== "suggestion")
@@ -22,106 +15,68 @@ export const POST: APIRoute = async (ctx) => {
 	const id = +(await ctx.request.text());
 	const action = ctx.params.action;
 	const contentTable = type === "suggestion" ? Suggestions : Comments;
-	const queueTable = type === "suggestion" ? SuggestionQueue : CommentQueue;
 	if (action === "reject") {
-		const [[res]] = (await ctx.locals.db.batch([
+		const [[{ user, content }]] = await ctx.locals.db.batch([
 			ctx.locals.db
-				.select()
-				.from(queueTable)
-				.innerJoin(Users, and(eq(queueTable.author, Users.id))),
-			ctx.locals.db.delete(queueTable).where(eq(queueTable.id, id)),
-		])) as unknown as [
-			{
-				users: UsersSelect;
-				suggestionQueue: SuggestionQueueSelect;
-				commentQueue: SuggestionQueueSelect;
-			}[],
-		];
-		if (res.users.moderationNotifications) {
+				.select({ user: Users, content: contentTable })
+				.from(Users)
+				.innerJoin(
+					contentTable,
+					and(eq(contentTable.id, id), eq(Users.id, contentTable.author)),
+				),
+
+			ctx.locals.db.update(contentTable).set({ status: ContentStatus.Archive }),
+		]);
+		if (user.moderationNotifications) {
 			ctx.locals.runtime.ctx.waitUntil(
 				sendEmail(
 					{
-						from: {
-							email: "notifications@votepotomac.com",
-							name: "Votepotomac Notifications",
-						},
-						personalizations: {
-							to: [{ name: res.users.name, email: res.users.email }],
-						},
+						to: user.email,
 						subject: `Your ${type} has been rejected`,
-						content: [
-							{
-								type: "text/html",
-								value: RejectionTemplate.replaceAll(
-									"{{title}}",
-									type === "suggestion"
-										? res.suggestionQueue.title
-										: res.commentQueue.description,
-								),
-							},
-						],
+						html: RejectionTemplate.replaceAll(
+							"{{title}}",
+							"parentId" in content ? content.description : content.title,
+						),
 					},
 					ctx.locals.runtime.env,
-				).then((res) =>
-					res.success === false ? console.error(res.errors) : "",
-				),
+				).then((res) => (res.error ? console.error(res.error) : "")),
 			);
 		}
 		return new Response(`Rejected ${type}`);
 	} else if (action === "approve") {
-		const [[res]] = (await ctx.locals.db.batch([
+		const [[{ user, content }]] = await ctx.locals.db.batch([
 			ctx.locals.db
-				.select()
-				.from(queueTable)
-				.innerJoin(Users, and(eq(queueTable.author, Users.id))),
-			ctx.locals.db.run(
-				sql`insert into ${contentTable} select * from ${queueTable} where ${queueTable.id} = ${id}`,
-			),
-			ctx.locals.db.delete(queueTable).where(eq(queueTable.id, id)),
-		])) as unknown as [
-			{
-				users: UsersSelect;
-				suggestionQueue: SuggestionQueueSelect;
-				commentQueue: CommentQueueSelect;
-			}[],
-		];
-		if (res.users.moderationNotifications) {
+				.select({ user: Users, content: contentTable })
+				.from(Users)
+				.innerJoin(
+					contentTable,
+					and(eq(contentTable.id, id), eq(Users.id, contentTable.author)),
+				),
+
+			ctx.locals.db.update(contentTable).set({ status: ContentStatus.Active }),
+		]);
+		if (user.moderationNotifications) {
 			ctx.locals.runtime.ctx.waitUntil(
 				sendEmail(
 					{
-						from: {
-							email: "notifications@votepotomac.com",
-							name: "Votepotomac Notifications",
-						},
-						personalizations: {
-							to: [{ name: res.users.name, email: res.users.email }],
-						},
+						to: [user.email],
 						subject: `Your ${type} has been approved!`,
-						content: [
-							{
-								type: "text/html",
-								value: ApprovalTemplate.replaceAll(
-									"{{title}}",
-									type === "suggestion"
-										? res.suggestionQueue.title
-										: res.commentQueue.description,
-								).replaceAll(
-									"{{suggestionURL}}",
-									ctx.site +
-										`suggestion/${
-											type === "suggestion" ? id : res.commentQueue.parentId
-										}`,
-								),
-							},
-						],
+						html: ApprovalTemplate.replaceAll(
+							"{{title}}",
+							"parentId" in content ? content.description : content.title,
+						).replaceAll(
+							"{{suggestionURL}}",
+							ctx.site +
+								`suggestion/${
+									"parentId" in content ? content.parentId : content.id
+								}`,
+						),
 					},
 					ctx.locals.runtime.env,
-				).then((res) =>
-					res.success === false ? console.error(res.errors) : "",
-				),
+				).then((res) => (res.error ? console.error(res.error) : "")),
 			);
 		}
-		if (type === "comment") {
+		if ("parentId" in content) {
 			ctx.locals.runtime.ctx.waitUntil(
 				(async () => {
 					// could put in above batch, but that is kind of a pain
@@ -132,36 +87,25 @@ export const POST: APIRoute = async (ctx) => {
 							sql`${Users.id} IN ${ctx.locals.db
 								.select({ id: Suggestions.author })
 								.from(Suggestions)
-								.where(eq(Suggestions.id, res.commentQueue.parentId))}`,
+								.where(eq(Suggestions.id, content.parentId))}`,
 						)
 						.get();
 					if (!parentAuthor?.replyNotifications) return;
 					const emailRes = await sendEmail(
 						{
-							from: {
-								email: "notifications@votepotomac.com",
-								name: "Votepotomac Notifications",
-							},
-							personalizations: {
-								to: [{ name: parentAuthor.name, email: parentAuthor.email }],
-							},
+							to: parentAuthor.email,
 							subject: `Someone has replied to your suggestion`,
-							content: [
-								{
-									type: "text/html",
-									value: ReplyTemplate.replaceAll(
-										"{{source}}",
-										res.commentQueue.description,
-									).replaceAll(
-										"{{suggestionURL}}",
-										ctx.site + `suggestion/${res.commentQueue.parentId}`,
-									),
-								},
-							],
+							html: ReplyTemplate.replaceAll(
+								"{{source}}",
+								content.description,
+							).replaceAll(
+								"{{suggestionURL}}",
+								ctx.site + `suggestion/${content.parentId}`,
+							),
 						},
 						ctx.locals.runtime.env,
 					);
-					if (!emailRes.success) console.error(emailRes.errors);
+					if (emailRes.error) console.error(emailRes.error);
 				})(),
 			);
 		}

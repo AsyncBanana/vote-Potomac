@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
-import { SuggestionQueue } from "../../../schemas/suggestion";
+import { Suggestions } from "../../../schemas/suggestion";
 import snarkdown from "snarkdown";
 import xss from "xss";
 import { verifyJWT } from "../../../modules/auth";
-import { sql } from "drizzle-orm";
+import { ContentStatus } from "../../../types/SharedContent";
 export const POST: APIRoute = async (ctx) => {
 	const authData = ctx.cookies.get("authData")?.value;
 	const userId =
@@ -75,12 +75,13 @@ export const POST: APIRoute = async (ctx) => {
 		stripIgnoreTagBody: ["script", "style"],
 	});
 	const res = await ctx.locals.db
-		.insert(SuggestionQueue)
+		.insert(Suggestions)
 		.values({
 			title,
 			description,
 			author: userId,
 			votes: [userId],
+			status: ContentStatus.ModerationQueue,
 		})
 		.run();
 	const expireDate = new Date();

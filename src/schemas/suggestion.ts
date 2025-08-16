@@ -5,8 +5,8 @@ import {
 	sqliteTable,
 	text,
 } from "drizzle-orm/sqlite-core";
-import { generateDendrite } from "../modules/dendrite";
-import { sql, type SQL } from "drizzle-orm";
+import { eq, sql, type SQL } from "drizzle-orm";
+import { ContentStatus } from "../types/SharedContent";
 export const CSVArray = customType<{
 	data: string[];
 	driverData: string;
@@ -25,16 +25,19 @@ export const Suggestions = sqliteTable(
 	"suggestions",
 	{
 		id: integer("id").primaryKey(),
-		author: text("author").notNull(), // use id
-		title: text("title").notNull(),
-		description: text("description").notNull(),
-		votes: CSVArray("votes").default([]),
-		downvotes: CSVArray("downvotes").default([]),
 		voteCount: integer("voteCount").generatedAlwaysAs(
 			(): SQL =>
 				sql`length(${Suggestions.votes})-length(replace(${Suggestions.votes}, ',', ''))-length(${Suggestions.downvotes})+length(replace(${Suggestions.downvotes}, ',', ''))`,
 			{ mode: "stored" },
 		),
+		status: integer("status")
+			.$type<ContentStatus>()
+			.default(ContentStatus.ModerationQueue),
+		author: text("author").notNull(), // use id
+		title: text("title").notNull(),
+		description: text("description").notNull(),
+		votes: CSVArray("votes").default([]),
+		downvotes: CSVArray("downvotes").default([]),
 	},
 	(table) => {
 		return {
@@ -48,12 +51,4 @@ export const Suggestions = sqliteTable(
 		};
 	},
 );
-export const SuggestionQueue = sqliteTable("suggestionQueue", {
-	id: integer("id").primaryKey().$defaultFn(generateDendrite),
-	author: text("author").notNull(), // use id
-	title: text("title").notNull(),
-	description: text("description").notNull(),
-	votes: CSVArray("votes").default([]),
-	downvotes: CSVArray("downvotes").default([]),
-});
-export type SuggestionQueueSelect = typeof SuggestionQueue.$inferSelect;
+export type Suggestion = typeof Suggestions.$inferSelect;

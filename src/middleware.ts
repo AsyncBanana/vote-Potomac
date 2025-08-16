@@ -3,8 +3,9 @@ import getDB from "./modules/db";
 import { UserRole, Users } from "./schemas/user";
 import { eq } from "drizzle-orm";
 import type { Props as AppLayoutProps } from "./layouts/AppLayout.astro";
-import { defineMiddleware } from "astro:middleware";
-export const onRequest = defineMiddleware((ctx, next) => {
+import { defineMiddleware, sequence } from "astro:middleware";
+const localsInit = defineMiddleware((ctx, next) => {
+	ctx.locals.runtime.env = { ...import.meta.env, ...ctx.locals.runtime.env };
 	[ctx.locals.db, ctx.locals.rawdb] = getDB(ctx.locals.runtime.env);
 	ctx.locals.login = (finalRedirectUrl?: string) => {
 		const [redirectURL, state] = generateOAuthURL(
@@ -60,3 +61,20 @@ export const onRequest = defineMiddleware((ctx, next) => {
 	};
 	return next();
 });
+const logger = defineMiddleware(async (ctx, next) => {
+	const response = await next();
+	if (!(response.status > 199 && response.status < 400)) {
+		const logResponse = response.clone();
+		const body =
+			logResponse.headers.get("Content-Type") === "text/html"
+				? "HTML Text"
+				: await logResponse.text();
+		console.log({
+			body,
+			message: `Response returned error code ${logResponse.status} and body "${body}"`,
+		});
+	}
+	return response;
+});
+
+export const onRequest = sequence(localsInit, logger);

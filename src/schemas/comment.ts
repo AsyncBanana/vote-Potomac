@@ -1,7 +1,8 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { generateDendrite } from "../modules/dendrite";
 import { CSVArray, Suggestions } from "./suggestion";
-import { type SQL, sql } from "drizzle-orm";
+import { eq, type SQL, sql } from "drizzle-orm";
+import { ContentStatus } from "../types/SharedContent";
 export const Comments = sqliteTable(
 	"comments",
 	{
@@ -9,6 +10,9 @@ export const Comments = sqliteTable(
 		parentId: integer("parentId")
 			.references(() => Suggestions.id, { onDelete: "cascade" })
 			.notNull(),
+		status: integer("status")
+			.$type<ContentStatus>()
+			.default(ContentStatus.ModerationQueue),
 		author: text("author").notNull(), // use id
 		description: text("description").notNull(),
 		votes: CSVArray("votes").default([]),
@@ -32,14 +36,4 @@ export const Comments = sqliteTable(
 		};
 	},
 );
-export const CommentQueue = sqliteTable("commentQueue", {
-	id: integer("id").primaryKey().$defaultFn(generateDendrite),
-	parentId: integer("parentId")
-		.references(() => Suggestions.id, { onDelete: "cascade" })
-		.notNull(),
-	author: text("author").notNull(), // use id
-	description: text("description").notNull(),
-	votes: CSVArray("votes").default([]),
-	downvotes: CSVArray("downvotes").default([]),
-});
-export type CommentQueueSelect = typeof CommentQueue.$inferSelect;
+export type Comment = typeof Comments.$inferSelect;

@@ -20,6 +20,7 @@ pnpm-debug.log*
 !.env.example
 
 pnpm-lock.yaml
+bun.lock
 main.db
 
 # macOS-specific files

@@ -75,33 +75,22 @@ export const POST: APIRoute = async (ctx) => {
 		ctx.locals.runtime.ctx.waitUntil(
 			sendEmail(
 				{
-					from: {
-						email: "notifications@votepotomac.com",
-						name: "Votepotomac Notifications",
-					},
-					personalizations: {
-						to: [{ name: authorData.name, email: authorData.email }],
-					},
+					to: [authorData.email],
 					subject:
 						vote === "up"
 							? `Your ${type} has been voted for!`
 							: `Your ${type} has been downvoted`,
-					content: [
-						{
-							type: "text/html",
-							value: VoteTemplate.replaceAll(
-								"{{message}}",
-								vote === "up"
-									? `Your ${type} "${res.title}" has been voted for!`
-									: `Your ${type} "${res.title}" has been downvoted`,
-							)
-								.replaceAll("{{votes}}", (res.voteCount || 0).toString())
-								.replaceAll("{{type}}", type),
-						},
-					],
+					html: VoteTemplate.replaceAll(
+						"{{message}}",
+						vote === "up"
+							? `Your ${type} "${res.title}" has been voted for!`
+							: `Your ${type} "${res.title}" has been downvoted. Sorry.`,
+					)
+						.replaceAll("{{votes}}", (res.voteCount || 0).toString())
+						.replaceAll("{{type}}", type),
 				},
 				ctx.locals.runtime.env,
-			).then((res) => (res.success === false ? console.error(res.errors) : "")),
+			).then((res) => (res.error ? console.error(res.error) : "")),
 		);
 	}
 	return new Response("Successfully voted for content");

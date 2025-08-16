@@ -4,6 +4,7 @@ import { Suggestions } from "../../../schemas/suggestion";
 import { and, eq } from "drizzle-orm";
 import { UserRole } from "../../../schemas/user";
 import { Comments } from "../../../schemas/comment";
+import { ContentStatus } from "../../../types/SharedContent";
 
 export const POST: APIRoute = async (ctx) => {
 	const { type } = ctx.params;
@@ -30,7 +31,8 @@ export const POST: APIRoute = async (ctx) => {
 	// this feels kind of sketchy, maybe change to explicit ternaries in each place where the table is used
 	const contentTable = type === "suggestion" ? Suggestions : Comments;
 	const res = await ctx.locals.db
-		.delete(contentTable)
+		.update(contentTable)
+		.set({ status: ContentStatus.Archive })
 		.where(
 			user.role >= UserRole.admin
 				? eq(contentTable.id, contentId)

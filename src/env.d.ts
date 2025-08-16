@@ -35,7 +35,7 @@ interface ImportMetaEnv {
 	readonly GOOGLE_OAUTH_ID: string;
 	readonly GOOGLE_OAUTH_SECRET: string;
 	readonly AUTH_SECRET: string | { alg: "HS256"; kty: string; k: string };
-	readonly DKIM_PRIVATE_KEY: string;
+	readonly RESEND_KEY: string;
 	readonly EPOCH: number;
 	readonly ORGANIZATION?: string;
 }

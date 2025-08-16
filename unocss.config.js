@@ -2,7 +2,7 @@
 import {
 	defineConfig,
 	presetIcons,
-	presetUno,
+	presetWind3,
 	presetWebFonts,
 	transformerDirectives,
 	presetTypography,
@@ -20,7 +20,7 @@ export default defineConfig({
 		},
 	},
 	presets: [
-		presetUno({
+		presetWind3({
 			dark: "media",
 		}),
 		presetIcons(),

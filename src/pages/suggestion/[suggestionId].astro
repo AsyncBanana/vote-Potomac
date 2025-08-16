@@ -2,13 +2,14 @@
 import Button from "../../components/Button.svelte";
 import Suggestion from "../../components/Suggestion.astro";
 import AppLayout from "../../layouts/AppLayout.astro";
-import { desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, ne } from "drizzle-orm";
 import { verifyJWT } from "../../modules/auth";
 import { Suggestions } from "../../schemas/suggestion";
 import { UserRole, Users } from "../../schemas/user";
 import { extractDendrite } from "../../modules/dendrite";
 import Textarea from "../../components/Textarea.astro";
 import { Comments } from "../../schemas/comment";
+import { ContentStatus } from "../../types/SharedContent";
 const id = Astro.params.suggestionId;
 
 let userId: string | undefined;
@@ -29,7 +30,12 @@ const [[suggestion], suggestions, comments, userDataRaw] =
 		Astro.locals.db
 			.select()
 			.from(Comments)
-			.where(eq(Comments.parentId, +id))
+			.where(
+				and(
+					eq(Comments.parentId, +id),
+					eq(Comments.status, ContentStatus.Active)
+				)
+			)
 			.orderBy(Comments.voteCount),
 		...(userId
 			? [
@@ -41,7 +47,10 @@ const [[suggestion], suggestions, comments, userDataRaw] =
 			: []), // the lengths I go to avoid naming things
 	]);
 const userData = userDataRaw?.[0];
-if (!suggestion) {
+if (
+	!suggestion ||
+	(suggestion.status !== ContentStatus.Active && userData.role < UserRole.admin)
+) {
 	return new Response("Not found", {
 		status: 404,
 	});
@@ -74,6 +83,7 @@ if (res.type === "error") return res.data;
 				id={`vote-suggestion-${suggestion.id}-up`}
 				vertical
 				ariaLabel="Vote for suggestion"
+				disabled={suggestion.status !== ContentStatus.Active}
 			/>
 			<Button
 				type={userId && suggestion.downvotes?.includes(userId)
@@ -85,6 +95,7 @@ if (res.type === "error") return res.data;
 				id={`vote-suggestion-${suggestion.id}-down`}
 				vertical
 				ariaLabel="Vote against suggestion"
+				disabled={suggestion.status !== ContentStatus.Active}
 			/>
 		</div>
 		<div class="text-3xl font-bold" id={`text-suggestion-${suggestion.id}`}>
