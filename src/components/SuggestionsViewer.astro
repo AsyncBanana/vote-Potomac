@@ -1,6 +1,6 @@
 ---
 import Suggestion from "./Suggestion.astro";
-import Button from "./Button.svelte";
+import LoadMore from "./LoadMore.svelte";
 
 export interface PartialSuggestion {
 	id: number;
@@ -35,12 +35,4 @@ const { suggestions, id, loadAdditional } = Astro.props;
 		/>
 	))
 }
-{
-	loadAdditional ? (
-		<Button type="secondary" onclick="loadComments(this)">
-			Load More Suggestions
-		</Button>
-	) : (
-		""
-	)
-}
+{true ? <LoadMore client:load /> : ""}

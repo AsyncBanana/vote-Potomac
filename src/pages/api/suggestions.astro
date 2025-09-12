@@ -50,12 +50,13 @@ const suggestions: PartialSuggestion[] =
 				.from(SuggestionsTable)
 				.where(eq(SuggestionsTable.status, ContentStatus.Active))
 				.limit(30)
-				.offset(+(offset || 0))
+
 				.orderBy(
 					desc(
 						sort === "top" ? SuggestionsTable.voteCount : SuggestionsTable.id
 					)
-				)));
+				)
+				.offset(+(offset || 0))));
 const id =
 	Astro.props.userData?.id ||
 	(await verifyJWT(
@@ -63,7 +64,7 @@ const id =
 		Astro.cookies.get("authData")?.value
 	));
 if (suggestions.length === 0) {
-	return new Response("No suggestions found", { status: 404 });
+	return new Response("No suggestions found", { status: 200 });
 }
 export const partial = true;
 ---

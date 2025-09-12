@@ -6,7 +6,6 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 import { extractDendrite } from "../../modules/dendrite";
 import { Comments } from "../../schemas/comment";
 import { Suggestions } from "../../schemas/suggestion";
-import Suggestion from "../../components/Suggestion.astro";
 import { ContentStatus } from "../../types/SharedContent";
 const res = await Astro.locals.handle({
 	minimumRole: 10,

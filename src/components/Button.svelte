@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { EventHandler } from "svelte/elements";
+
 	export let href: string | undefined = undefined;
 	export let type:
 		| "primary"
@@ -19,6 +21,7 @@
 	export let icon: string = "";
 	export let vertical: boolean = false;
 	export let value: string = "";
+	export let onclick: EventHandler = undefined;
 	let className = "";
 	export { className as class };
 </script>
@@ -38,9 +41,7 @@
 	class:btn-square={square}
 	class:btn-block={fullWidth}
 	class:flex-col={vertical}
-	on:click
-	on:mousedown
-	on:mouseup
+	{onclick}
 	aria-label={ariaLabel}
 	type={action}
 	{disabled}

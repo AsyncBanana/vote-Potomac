@@ -17,4 +17,9 @@ export default {
 		authToken: env.DATABASE_SECRET,
 	},
 	out: "migrations",
+	tablesFilter: [
+		"!suggestions_fts_data",
+		"!suggestions_fts_config",
+		"!suggestions_fts",
+	],
 };

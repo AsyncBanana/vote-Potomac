@@ -132,12 +132,13 @@ if (notification) {
 				queryParams.size > 0 ? `?${queryParams.toString()}` : ""
 			}`
 		);
-		if (res.status === 404) {
+		const text = await res.text();
+		if (text === "No suggestions found") {
 			suggestions.innerHTML = "No suggestions found :(";
 			return;
 		}
 		if (!res.ok) return;
-		suggestions.innerHTML = await res.text();
+		suggestions.innerHTML = text;
 		if (pushstate)
 			history.pushState(
 				{ q, sort },
@@ -166,9 +167,10 @@ if (notification) {
 	});
 	let offset = 30;
 	// @ts-expect-error trust guys not using a js framework was a great idea
-	window.loadComments = async (button: HTMLButtonElement) => {
-		button.remove();
-		const res = await fetch(`/api/suggestions?offset=${offset}`);
+	window.loadSuggestions = async () => {
+		const res = await fetch(
+			`/api/suggestions?offset=${offset}&sort=${new URLSearchParams(document.location.search).get("sort") || "top"}`
+		);
 		offset += 30; // if the suggestion count is not 30, this will not matter
 		suggestions.insertAdjacentHTML("beforeend", await res.text());
 	};
