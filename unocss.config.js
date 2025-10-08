@@ -20,13 +20,11 @@ export default defineConfig({
 		},
 	},
 	presets: [
-		presetWind3({
-			dark: "media",
-		}),
+		presetWind3({ dark: "class" }),
 		presetIcons(),
 		presetWebFonts({
 			fonts: {
-				// ...
+				// ...s
 			},
 		}),
 		presetTypography(),

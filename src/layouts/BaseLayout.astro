@@ -6,6 +6,7 @@ export interface Props {
 	title?: string;
 	description?: string;
 	noindex?: boolean;
+	theme?: "light" | "dark";
 }
 const {
 	class: className = "",
@@ -13,10 +14,11 @@ const {
 	title = "Vote! Potomac",
 	description = "Vote! Potomac is the SGA suggestion box of the The Potomac school in McLean, VA",
 	noindex = false,
+	theme,
 } = Astro.props;
 ---
 
-<html lang="en">
+<html lang="en" data-theme={theme}>
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/x-icon" href="/favicon.ico" />

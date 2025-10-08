@@ -8,6 +8,7 @@ export interface Props extends BaseProps {
 	minimumRole: UserRole;
 	id?: string;
 	signInRedirect?: string;
+	theme?: "light" | "dark";
 }
 const {
 	class: className,
@@ -16,11 +17,12 @@ const {
 	title,
 	description,
 	noindex,
+	theme,
 } = Astro.props;
 let { userData } = Astro.props;
 ---
 
-<BaseLayout class={className} {id} {title} {description} {noindex}>
+<BaseLayout class={className} {id} {title} {description} {noindex} {theme}>
 	<div class="h-3"></div>
 	<div
 		class="flex flex-col gap-3 mb-3 md:flex-row md:w-main place-content-center"

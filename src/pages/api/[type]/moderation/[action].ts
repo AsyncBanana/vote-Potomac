@@ -27,7 +27,7 @@ export const POST: APIRoute = async (ctx) => {
 
 			ctx.locals.db.update(contentTable).set({ status: ContentStatus.Archive }),
 		]);
-		if (user.moderationNotifications) {
+		if (user.moderationNotifications && import.meta.env.PROD) {
 			ctx.locals.runtime.ctx.waitUntil(
 				sendEmail(
 					{
@@ -55,7 +55,7 @@ export const POST: APIRoute = async (ctx) => {
 
 			ctx.locals.db.update(contentTable).set({ status: ContentStatus.Active }),
 		]);
-		if (user.moderationNotifications) {
+		if (user.moderationNotifications && import.meta.env.PROD) {
 			ctx.locals.runtime.ctx.waitUntil(
 				sendEmail(
 					{
@@ -90,7 +90,8 @@ export const POST: APIRoute = async (ctx) => {
 								.where(eq(Suggestions.id, content.parentId))}`,
 						)
 						.get();
-					if (!parentAuthor?.replyNotifications) return;
+					if (!parentAuthor?.replyNotifications || !import.meta.env.PROD)
+						return;
 					const emailRes = await sendEmail(
 						{
 							to: parentAuthor.email,
