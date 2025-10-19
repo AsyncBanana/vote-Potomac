@@ -1,12 +1,20 @@
 ---
+import { FoodLocation, type SuggestionMetadata } from "../schemas/suggestion";
 import Button from "./Button.svelte";
 interface Props {
 	title: string;
 	votes: number;
 	vote?: "up" | "down";
 	id: number;
+	metadata?: SuggestionMetadata | null;
 }
-const { title, votes, id, vote } = Astro.props;
+const { title, votes, id, vote, metadata } = Astro.props;
+const invertedFoodLocations: Record<FoodLocation, keyof typeof FoodLocation> =
+	{};
+for (let location in FoodLocation) {
+	invertedFoodLocations[FoodLocation[location as keyof typeof FoodLocation]] =
+		location as keyof typeof FoodLocation;
+}
 ---
 
 <a
@@ -20,6 +28,12 @@ const { title, votes, id, vote } = Astro.props;
 	>
 		{votes}
 	</Button>
+	{
+		metadata?.locations &&
+			metadata.locations.map((loc) => (
+				<img src={`/images/${invertedFoodLocations[loc]}.avif`} class="w-6" />
+			))
+	}
 	<h2 class="col-span-4 text-xl align-middle font-bold">
 		{title}
 	</h2>

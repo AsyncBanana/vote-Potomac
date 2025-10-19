@@ -1,14 +1,15 @@
 ---
 import AppLayout from "../layouts/AppLayout.astro";
 import { verifyJWT } from "../modules/auth";
-import { Suggestions } from "../schemas/suggestion";
+import { FoodLocation, Suggestions } from "../schemas/suggestion";
 import { Users } from "../schemas/user";
 import { desc, eq } from "drizzle-orm";
 import Button from "../components/Button.svelte";
 import { notifications } from "../modules/notification";
 import SuggestionsViewer from "../components/SuggestionsViewer.astro";
 import { ContentStatus } from "../types/SharedContent";
-import Suggestion from "../components/Suggestion.astro";
+import FoodForm from "../fragments/FoodForm.svelte";
+import ImageStarGrid from "../components/ImageStarGrid.svelte";
 export const prerender = false;
 let id;
 const authData = Astro.cookies.get("authData")?.value;
@@ -24,11 +25,12 @@ const [suggestions, userData] = await Astro.locals.db.batch([
 			voteCount: Suggestions.voteCount,
 			votes: Suggestions.votes,
 			downvotes: Suggestions.downvotes,
+			metadata: Suggestions.metadata,
 		})
 		.from(Suggestions)
 		.limit(30)
 		.orderBy(desc(sortOrder === "top" ? Suggestions.voteCount : Suggestions.id))
-		.where(eq(Suggestions.status, ContentStatus.Active)),
+		.where(eq(Suggestions.status, ContentStatus.FoodActive)),
 	...(id
 		? [
 				Astro.locals.db
@@ -50,7 +52,7 @@ if (notification) {
 }
 ---
 
-<AppLayout {...res.data} theme="light">
+<AppLayout {...res.data} theme="light" newSuggestionButton={false}>
 	<div class="flex flex-col gap-3 mt-3 w-main">
 		{
 			notification && (
@@ -68,13 +70,31 @@ if (notification) {
 				</div>
 			)
 		}
+		<div class="h-[50vh] w-full">
+			<h1 class="font-black text-7xl text-center">Let's get better snacks</h1>
+			<div class="grid grid-cols-3 gap-1 w-max m-auto">
+				<ImageStarGrid
+					items={[
+						["Vending Machine", "/images/vending.avif", FoodLocation.vending],
+						["Breakfast Bar", "/images/breakfast.avif", FoodLocation.breakfast],
+						["Panther Pit", "/images/pantherpit.avif", FoodLocation.pantherpit],
+					]}
+					client:load
+				/>
+			</div>
+		</div>
+		<Button
+			href={userData?.[0]
+				? "#submit"
+				: `/api/auth/signin?redirectURL=${encodeURIComponent("/food#submit")}`}
+			className="w-min block">Submit New</Button
+		>
 		<select class="select select-bordered w-max" id="sort">
 			<option selected={sortOrder === "recent"} value="recent"
 				>Most recent</option
 			>
 			<option selected={sortOrder === "top"} value="top">Most votes</option>
 		</select>
-
 		<div id="suggestions" class="flex flex-col gap-3">
 			<SuggestionsViewer
 				id={userData?.[0]?.id}
@@ -83,19 +103,48 @@ if (notification) {
 			/>
 		</div>
 	</div>
+	<FoodForm client:load />
 </AppLayout>
+<!-- // BUG: will not work without global -->
+<style is:global>
+	:is(.ci-vending, .ci-breakfast, .ci-pantherpit) {
+		&::before {
+			width: 32px;
+			height: 32px;
+			background-position: center;
+			background-size: contain;
+			background-repeat: no-repeat;
+			content: "";
+		}
+		&:checked {
+			@apply !bg-secondary;
+		}
+	}
+	.ci-vending::before {
+		background-image: url("/images/vending.avif");
+	}
+	.ci-breakfast::before {
+		background-image: url("/images/breakfast.avif");
+	}
+	.ci-pantherpit::before {
+		background-image: url("/images/pantherpit.avif");
+	}
+</style>
 <script>
 	async function querySearch(
-		q: string = search.value,
+		// q is unused as of now
+		q: "" = "",
 		sort: string = sortEl.options[sortEl.selectedIndex].value,
 		pushstate: boolean = true
 	) {
 		const queryParams = new URLSearchParams();
 		if (q) queryParams.append("q", q);
 		if (sort) queryParams.append("sort", sort);
+		if (window.foodLocation)
+			queryParams.append("location", window.foodLocation);
 		const res = await fetch(
-			`/api/suggestions/${
-				queryParams.size > 0 ? `?${queryParams.toString()}` : ""
+			`/api/suggestions?food${
+				queryParams.size > 0 ? `&${queryParams.toString()}` : ""
 			}`
 		);
 		const text = await res.text();
@@ -109,33 +158,26 @@ if (notification) {
 			history.pushState(
 				{ q, sort },
 				"",
-				queryParams.size > 0 ? `/?${queryParams.toString()}` : "/"
+				queryParams.size > 0 ? `/food?${queryParams.toString()}` : "/"
 			);
 	}
-	let searchFunc: NodeJS.Timeout;
-	const search = document.getElementById(
-		"suggestionSearch"
-	) as HTMLInputElement;
 	const suggestions = document.getElementById("suggestions") as HTMLDivElement;
 	const sortEl = document.getElementById(
 		"sort"
 	) as unknown as HTMLSelectElement;
-	search.addEventListener("input", (e) => {
-		if (searchFunc) clearTimeout(searchFunc);
-		searchFunc = setTimeout(querySearch, 600);
-	});
 	addEventListener("popstate", async (event) => {
-		search.value = event.state.q;
+		// search.value = event.state.q;
 		await querySearch(event.state.q, event.state.sort, false);
 	});
 	sortEl.addEventListener("change", async (e) => {
 		await querySearch();
 	});
 	let offset = 30;
+	window.querySearch = querySearch;
 	// @ts-expect-error trust guys not using a js framework was a great idea
 	window.loadSuggestions = async () => {
 		const res = await fetch(
-			`/api/suggestions?offset=${offset}&sort=${new URLSearchParams(document.location.search).get("sort") || "top"}`
+			`/api/suggestions?offset=${offset}&sort=${new URLSearchParams(document.location.search).get("sort") || "top"}&food${window.foodLocation ? `&location=${window.foodLocation}` : ""}`
 		);
 		offset += 30; // if the suggestion count is not 30, this will not matter
 		suggestions.insertAdjacentHTML("beforeend", await res.text());

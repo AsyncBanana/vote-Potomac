@@ -27,8 +27,8 @@ if (res.type === "error") return res.data;
 			id="title"
 			name="title"
 			required
-			minlength={import.meta.env.MIN_TITLE_LENGTH}
-			maxlength={import.meta.env.MAX_TITLE_LENGTH}
+			minlength={import.meta.env.PUBLIC_MIN_TITLE_LENGTH}
+			maxlength={import.meta.env.PUBLIC_MAX_TITLE_LENGTH}
 		/>
 		<Textarea
 			markdown={true}

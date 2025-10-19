@@ -26,8 +26,8 @@ interface ImportMetaEnv {
 	readonly DATABASE_URL: string;
 	readonly DATABASE_SECRET?: string;
 	readonly CLOUDFLARE_ACCOUNT_ID: string;
-	readonly MIN_TITLE_LENGTH: number;
-	readonly MAX_TITLE_LENGTH: number;
+	readonly PUBLIC_MIN_TITLE_LENGTH: number;
+	readonly PUBLIC_MAX_TITLE_LENGTH: number;
 	readonly MIN_DESCRIPTION_LENGTH: number;
 	readonly MAX_DESCRIPTION_LENGTH: number;
 	readonly MIN_COMMENT_LENGTH: number;

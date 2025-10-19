@@ -1,11 +1,12 @@
 import {
+	blob,
 	customType,
 	index,
 	integer,
 	sqliteTable,
 	text,
 } from "drizzle-orm/sqlite-core";
-import { eq, sql, type SQL } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
 import { ContentStatus } from "../types/SharedContent";
 export const CSVArray = customType<{
 	data: string[];
@@ -21,6 +22,16 @@ export const CSVArray = customType<{
 		return value.join(",") + (value.length > 0 ? "," : "");
 	},
 });
+
+export const FoodLocation = {
+	vending: 1,
+	breakfast: 2,
+	pantherpit: 3,
+} as const;
+export type FoodLocation = (typeof FoodLocation)[keyof typeof FoodLocation];
+export interface SuggestionMetadata {
+	locations?: (typeof FoodLocation)[keyof typeof FoodLocation][];
+}
 export const Suggestions = sqliteTable(
 	"suggestions",
 	{
@@ -35,9 +46,10 @@ export const Suggestions = sqliteTable(
 			.default(ContentStatus.ModerationQueue),
 		author: text("author").notNull(), // use id
 		title: text("title").notNull(),
-		description: text("description").notNull(),
+		description: text("description"),
 		votes: CSVArray("votes").default([]),
 		downvotes: CSVArray("downvotes").default([]),
+		metadata: blob("metadata", { mode: "json" }).$type<SuggestionMetadata>(),
 	},
 	(table) => {
 		return {

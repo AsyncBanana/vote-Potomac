@@ -9,6 +9,7 @@ export interface Props extends BaseProps {
 	id?: string;
 	signInRedirect?: string;
 	theme?: "light" | "dark";
+	newSuggestionButton?: boolean;
 }
 const {
 	class: className,
@@ -18,8 +19,9 @@ const {
 	description,
 	noindex,
 	theme,
+	userData,
+	newSuggestionButton = true,
 } = Astro.props;
-let { userData } = Astro.props;
 ---
 
 <BaseLayout class={className} {id} {title} {description} {noindex} {theme}>
@@ -35,10 +37,16 @@ let { userData } = Astro.props;
 				/>Vote! Potomac</a
 			>
 		</h1>
-		<div class="flex flex-row gap-2 place-items-center lt-md:m-auto">
-			<Button type="tertiary" icon="i-ic:outline-plus" href="/submit">
-				New
-			</Button>
+		<div class="flex flex-row gap-2 place-items-center w-max lt-md:m-auto">
+			{
+				newSuggestionButton ? (
+					<Button type="tertiary" icon="i-ic:outline-plus" href="/submit">
+						New
+					</Button>
+				) : (
+					""
+				)
+			}
 			{
 				userData ? (
 					<details class="dropdown dropdown-end dropdown-bottom">

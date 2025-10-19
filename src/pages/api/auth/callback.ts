@@ -80,7 +80,7 @@ export const GET: APIRoute = async (ctx) => {
 	);
 	ctx.cookies.set("authData", jwt, {
 		path: "/",
-		httpOnly: true,
+		httpOnly: false,
 		secure: ctx.locals.runtime.env.PROD,
 		sameSite: "lax",
 		expires: new Date(token.exp * 1000),

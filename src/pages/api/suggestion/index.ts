@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { Suggestions } from "../../../schemas/suggestion";
+import { FoodLocation, Suggestions } from "../../../schemas/suggestion";
 import snarkdown from "snarkdown";
 import xss from "xss";
 import { verifyJWT } from "../../../modules/auth";
@@ -21,53 +21,73 @@ export const POST: APIRoute = async (ctx) => {
 			status: 400,
 		});
 	}
+	const type: "food" | "suggestion" =
+		(ctx.url.searchParams.get("type") as "food" | "suggestion") || "suggestion";
+	const isLive = ctx.url.searchParams.has("live");
 	let title = body.get("title");
-	let description = body.get("description");
-	if (typeof title !== "string" || typeof description !== "string") {
-		return new Response("Please provide a title and description", {
+	let description = body.get("description") as string | undefined;
+	if (typeof title !== "string") {
+		return new Response("Please provide a title", {
 			status: 400,
 		});
 	}
 	if (
-		title.length < import.meta.env.MIN_TITLE_LENGTH ||
-		title.length > import.meta.env.MAX_TITLE_LENGTH ||
-		description.length < import.meta.env.MIN_DESCRIPTION_LENGTH ||
-		description.length > import.meta.env.MAX_DESCRIPTION_LENGTH
+		title.length < import.meta.env.PUBLIC_MIN_TITLE_LENGTH ||
+		title.length > import.meta.env.PUBLIC_MAX_TITLE_LENGTH
 	) {
 		return new Response(
-			`Please make the title between ${import.meta.env.MIN_TITLE_LENGTH} and ${
-				import.meta.env.MAX_TITLE_LENGTH
-			} characters and the description between ${
-				import.meta.env.MIN_DESCRIPTION_LENGTH
-			} and ${import.meta.env.MAX_DESCRIPTION_LENGTH} characters`,
+			`Please make the title between ${import.meta.env.PUBLIC_MIN_TITLE_LENGTH} and ${
+				import.meta.env.PUBLIC_MAX_TITLE_LENGTH
+			} characters`,
 			{
 				status: 400,
 			},
 		);
 	}
-	description = snarkdown(description);
-	// optimize using HTMLRewriter?
-	description = xss(description, {
-		allowCommentTag: false,
-		allowList: {
-			header: [],
-			code: ["class"],
-			pre: [],
-			blockquote: [],
-			a: ["href"],
-			s: [],
-			strong: [],
-			img: ["src", "alt", "title"],
-			u: [],
-			br: [],
-			em: [],
-			ul: [],
-			li: [],
-			ol: [],
-		},
-		css: false,
-		stripIgnoreTagBody: ["script", "style"],
-	});
+	if (type === "suggestion") {
+		if (typeof description !== "string") {
+			return new Response("Please provide a description", {
+				status: 400,
+			});
+		}
+		if (
+			description.length < import.meta.env.MIN_DESCRIPTION_LENGTH ||
+			description.length > import.meta.env.MAX_DESCRIPTION_LENGTH
+		) {
+			return new Response(
+				`Please make the description between ${
+					import.meta.env.MIN_DESCRIPTION_LENGTH
+				} and ${import.meta.env.MAX_DESCRIPTION_LENGTH} characters`,
+				{
+					status: 400,
+				},
+			);
+		}
+		description = snarkdown(description);
+		// optimize using HTMLRewriter?
+		description = xss(description, {
+			allowCommentTag: false,
+			allowList: {
+				header: [],
+				code: ["class"],
+				pre: [],
+				blockquote: [],
+				a: ["href"],
+				s: [],
+				strong: [],
+				img: ["src", "alt", "title"],
+				u: [],
+				br: [],
+				em: [],
+				ul: [],
+				li: [],
+				ol: [],
+			},
+			css: false,
+			stripIgnoreTagBody: ["script", "style"],
+		});
+	}
+
 	title = xss(title, {
 		allowCommentTag: false,
 		allowList: {},
@@ -78,12 +98,27 @@ export const POST: APIRoute = async (ctx) => {
 		.insert(Suggestions)
 		.values({
 			title,
-			description,
+			description: type === "suggestion" ? description : null,
 			author: userId,
 			votes: [userId],
-			status: ContentStatus.ModerationQueue,
+			status:
+				type === "food"
+					? ContentStatus.FoodActive
+					: ContentStatus.ModerationQueue,
+			metadata:
+				type === "food"
+					? {
+							locations: Object.keys(FoodLocation)
+								.filter((v) => body.has(v))
+								.map((v) => FoodLocation[v as keyof typeof FoodLocation]),
+						}
+					: null,
 		})
-		.run();
+		.returning({ id: Suggestions.id })
+		.get();
+	if (isLive) {
+		return new Response(res.id.toString());
+	}
 	const expireDate = new Date();
 	expireDate.setTime(expireDate.getTime() + 300000 /* 5 minutes */);
 	ctx.cookies.set("notification", "SUGGESTION_CREATED", {

@@ -14,10 +14,11 @@ export default defineConfig({
 	shortcuts: [
 		// ...
 	],
-	theme: {
-		colors: {
-			// ...
-		},
+	extendTheme: (theme) => {
+		return {
+			...theme,
+			breakpoints: { ...theme.breakpoints, xs: "400px" },
+		};
 	},
 	presets: [
 		presetWind3({ dark: "class" }),

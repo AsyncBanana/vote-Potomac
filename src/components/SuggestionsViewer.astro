@@ -1,6 +1,7 @@
 ---
 import Suggestion from "./Suggestion.astro";
 import LoadMore from "./LoadMore.svelte";
+import type { SuggestionMetadata } from "../schemas/suggestion";
 
 export interface PartialSuggestion {
 	id: number;
@@ -8,6 +9,7 @@ export interface PartialSuggestion {
 	title: string;
 	votes: string[] | null;
 	downvotes: string[] | null;
+	metadata: SuggestionMetadata | null;
 }
 export interface Props {
 	suggestions: PartialSuggestion[];
@@ -32,6 +34,7 @@ const { suggestions, id, loadAdditional } = Astro.props;
 							: undefined
 					: undefined
 			}
+			metadata={suggestion.metadata}
 		/>
 	))
 }
