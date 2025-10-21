@@ -20,6 +20,12 @@ declare namespace App {
 		getSession: () => Promise<
 			import("./schemas/user.ts").UsersSelect | undefined
 		>;
+		getSuggestions: (config: {
+			query?: string;
+			offset?: number;
+			sort?: "top" | "recent";
+			isFood?: boolean;
+		}) => Promise<import("./types/Data.ts").SuggestionPreview[]>;
 	}
 }
 interface ImportMetaEnv {

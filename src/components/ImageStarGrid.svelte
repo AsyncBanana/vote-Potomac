@@ -1,44 +1,41 @@
 <script lang="ts">
 	import clsx from "clsx";
-
+	import { queryConfig } from "../state/QueryConfig.svelte";
 	interface Props {
 		items: [string, string, number][];
 	}
 	let { items }: Props = $props();
-	let selected = $state<number>();
 	const colors = [
 		"linear-gradient(270deg,rgba(255, 106, 0, 1) 0%,rgba(255, 152, 79, 1) 100%)",
 		"linear-gradient(0deg,hsl(208 100% 50%), hsl(208 50% 50%)",
 		"linear-gradient(0deg,hsl(300 100% 50%), hsl(300 50% 50%)",
 	];
-	$effect(() => {
-		window.foodLocation = selected;
-		window.querySearch();
-	});
 </script>
 
 {#each items as item, idx}
 	<div
 		class={clsx(
 			"transition-200",
-			selected && selected !== item[2] && "opacity-60 scale-95",
+			queryConfig().foodLocation &&
+				queryConfig().foodLocation !== item[2] &&
+				"opacity-60 scale-95",
 		)}
 	>
 		<button
 			class={clsx(
 				"relative flex place-items-center place-content-center aspect-square group bg-transparent rounded-full transition-200 h-24 xs:h-28 xl:h-48",
-				selected === item[2] && "after:rotate-30",
-				selected &&
-					selected !== item[2] &&
+				queryConfig().foodLocation === item[2] && "after:rotate-30",
+				queryConfig().foodLocation &&
+					queryConfig().foodLocation !== item[2] &&
 					"after:!bg-[linear-gradient(gray,gray)]",
 			)}
 			style={`background: ${colors[idx]}`}
 			aria-label={item[0]}
 			onclick={() => {
-				if (selected === item[2]) {
-					selected = 0;
+				if (queryConfig().foodLocation === item[2]) {
+					queryConfig().foodLocation = undefined;
 				} else {
-					selected = item[2];
+					queryConfig().foodLocation = item[2];
 				}
 			}}
 		>
@@ -47,7 +44,7 @@
 				src={item[1]}
 				class={clsx(
 					"h-1/2 group-hover:scale-110 transition-200 m-auto",
-					selected === item[2] && "scale-110",
+					queryConfig().foodLocation === item[2] && "scale-110",
 				)}
 			/>
 		</button>

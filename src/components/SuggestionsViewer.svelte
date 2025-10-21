@@ -1,0 +1,87 @@
+<script lang="ts">
+	import Suggestion from "./Suggestion.svelte";
+	import Button from "./Button.svelte";
+	import type { SuggestionPreview } from "../types/Data";
+	import type { QuestionQueryConfig } from "../modules/getSuggestions";
+	import { queryConfig as partialQueryConfig } from "../state/QueryConfig.svelte";
+	interface Props {
+		suggestions: SuggestionPreview[];
+		queryConfig?: Exclude<QuestionQueryConfig, "offset">;
+		userId?: string;
+		loadAdditional?: boolean;
+		isFood?: boolean;
+	}
+	let {
+		userId,
+		suggestions = $bindable(),
+		loadAdditional = $bindable(),
+		isFood,
+	}: Props = $props();
+	let notice = $state("");
+	let offset = $state(0);
+	async function loadSuggestions(keep: boolean = true) {
+		const res = await fetch(
+			`/api/suggestions?offset=${offset}&sort=${queryConfig?.sort || "top"}${queryConfig?.foodLocation ? `&location=${queryConfig.foodLocation}` : ""}${queryConfig.isFood ? "&food" : ""}`,
+		);
+		if (res.status === 404) {
+			notice = "No more suggestions found :(";
+			loadAdditional = false;
+			return;
+		}
+		if (!res.ok) {
+			notice = "Error loading more suggestions :(";
+			loadAdditional = false;
+			return;
+		}
+		loadAdditional = true;
+		const newSuggestions = (await res.json()) as SuggestionPreview[];
+		loadAdditional = newSuggestions.length > 29;
+		if (keep) {
+			suggestions = [...suggestions, ...newSuggestions];
+		} else {
+			suggestions = newSuggestions;
+		}
+	}
+	let initialRun = true;
+	$effect(() => {
+		partialQueryConfig().sort;
+		partialQueryConfig().query;
+		partialQueryConfig().foodLocation;
+		if (initialRun) {
+			initialRun = false;
+			return;
+		}
+		loadSuggestions(false);
+	});
+	const queryConfig = $derived({
+		...partialQueryConfig(),
+		isFood: isFood,
+	});
+</script>
+
+{#each suggestions as suggestion}
+	<Suggestion
+		title={suggestion.title}
+		votes={suggestion?.voteCount || 0}
+		id={suggestion.id}
+		vote={userId
+			? suggestion.votes?.includes(userId)
+				? "up"
+				: suggestion.downvotes?.includes(userId)
+					? "down"
+					: undefined
+			: undefined}
+		metadata={suggestion.metadata}
+	/>
+{/each}
+{#if loadAdditional}
+	<Button
+		on:click={() => {
+			offset += 30;
+			loadSuggestions();
+		}}
+	></Button>
+{/if}
+{#if notice}
+	<p>{notice}</p>
+{/if}

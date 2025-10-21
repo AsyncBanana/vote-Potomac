@@ -1,15 +1,14 @@
 ---
 import AppLayout from "../layouts/AppLayout.astro";
 import { verifyJWT } from "../modules/auth";
-import { Suggestions } from "../schemas/suggestion";
 import { Users } from "../schemas/user";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import Button from "../components/Button.svelte";
 import { notifications } from "../modules/notification";
-import { SuggestionsFTS } from "../schemas/fts";
-import SuggestionsViewer from "../components/SuggestionsViewer.astro";
-import { ContentStatus } from "../types/SharedContent";
-import Suggestion from "../components/Suggestion.astro";
+import URLBasedSuggestionsViewer from "../components/URLBasedSuggestionsViewer.svelte";
+import getSuggestions, {
+	type QuestionQueryConfig,
+} from "../modules/getSuggestions.ts";
 export const prerender = false;
 let id;
 const authData = Astro.cookies.get("authData")?.value;
@@ -17,40 +16,19 @@ if (authData) {
 	id = await verifyJWT(Astro.locals.runtime.env, authData);
 }
 const query = Astro.url.searchParams.get("q");
-const sortOrder = Astro.url.searchParams.get("sort") || "top";
+const sortOrder = (Astro.url.searchParams.get("sort") || "top") as
+	| "top"
+	| "recent";
 const [suggestions, userData] = await Astro.locals.db.batch([
-	query
-		? Astro.locals.db
-				.select({
-					id: SuggestionsFTS.id,
-					title: SuggestionsFTS.title,
-					voteCount: SuggestionsFTS.voteCount,
-					votes: SuggestionsFTS.votes,
-					downvotes: SuggestionsFTS.downvotes,
-				})
-				.from(SuggestionsFTS)
-				.where(
-					and(
-						eq(SuggestionsFTS, ContentStatus.Active),
-						sql`${SuggestionsFTS.title} MATCH ${query}`
-					)
-				)
-				.limit(30)
-				.orderBy(sql`rank`)
-		: Astro.locals.db
-				.select({
-					id: Suggestions.id,
-					title: Suggestions.title,
-					voteCount: Suggestions.voteCount,
-					votes: Suggestions.votes,
-					downvotes: Suggestions.downvotes,
-				})
-				.from(Suggestions)
-				.limit(30)
-				.orderBy(
-					desc(sortOrder === "top" ? Suggestions.voteCount : Suggestions.id)
-				)
-				.where(eq(Suggestions.status, ContentStatus.Active)),
+	getSuggestions(
+		{
+			query,
+			sort: sortOrder,
+			isFood: false,
+			offset: 0,
+		},
+		Astro
+	),
 	...(id
 		? [
 				Astro.locals.db
@@ -110,68 +88,16 @@ if (notification) {
 		</select>
 
 		<div id="suggestions" class="flex flex-col gap-3">
-			<SuggestionsViewer
-				id={userData?.[0]?.id}
-				suggestions={suggestions}
-				loadAdditional={suggestions.length === 30}
+			<URLBasedSuggestionsViewer
+				userId={userData?.[0]?.id}
+				initialSuggestions={suggestions}
+				initialLoadAdditional={suggestions.length === 30}
+				queryConfig={{
+					sort: sortOrder,
+					isFood: false,
+					query,
+				} satisfies QuestionQueryConfig}
 			/>
 		</div>
 	</div>
 </AppLayout>
-<script>
-	async function querySearch(
-		q: string = search.value,
-		sort: string = sortEl.options[sortEl.selectedIndex].value,
-		pushstate: boolean = true
-	) {
-		const queryParams = new URLSearchParams();
-		if (q) queryParams.append("q", q);
-		if (sort) queryParams.append("sort", sort);
-		const res = await fetch(
-			`/api/suggestions/${
-				queryParams.size > 0 ? `?${queryParams.toString()}` : ""
-			}`
-		);
-		const text = await res.text();
-		if (text === "No suggestions found") {
-			suggestions.innerHTML = "No suggestions found :(";
-			return;
-		}
-		if (!res.ok) return;
-		suggestions.innerHTML = text;
-		if (pushstate)
-			history.pushState(
-				{ q, sort },
-				"",
-				queryParams.size > 0 ? `/?${queryParams.toString()}` : "/"
-			);
-	}
-	let searchFunc: NodeJS.Timeout;
-	const search = document.getElementById(
-		"suggestionSearch"
-	) as HTMLInputElement;
-	const suggestions = document.getElementById("suggestions") as HTMLDivElement;
-	const sortEl = document.getElementById(
-		"sort"
-	) as unknown as HTMLSelectElement;
-	search.addEventListener("input", (e) => {
-		if (searchFunc) clearTimeout(searchFunc);
-		searchFunc = setTimeout(querySearch, 600);
-	});
-	addEventListener("popstate", async (event) => {
-		search.value = event.state.q;
-		await querySearch(event.state.q, event.state.sort, false);
-	});
-	sortEl.addEventListener("change", async (e) => {
-		await querySearch();
-	});
-	let offset = 30;
-	// @ts-expect-error trust guys not using a js framework was a great idea
-	window.loadSuggestions = async () => {
-		const res = await fetch(
-			`/api/suggestions?offset=${offset}&sort=${new URLSearchParams(document.location.search).get("sort") || "top"}`
-		);
-		offset += 30; // if the suggestion count is not 30, this will not matter
-		suggestions.insertAdjacentHTML("beforeend", await res.text());
-	};
-</script>
