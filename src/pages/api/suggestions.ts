@@ -19,7 +19,6 @@ export const GET: APIRoute = async (ctx) => {
 		},
 		ctx,
 	);
-	console.log("FUCK", res);
 	if (res.length === 0) return new Response("", { status: 404 });
 	return new Response(JSON.stringify(res));
 };

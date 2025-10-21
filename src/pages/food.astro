@@ -90,7 +90,7 @@ if (notification) {
 		<OrderSelect sortOrder={sortOrder} client:load />
 		<div id="suggestions" class="flex flex-col gap-3">
 			<URLBasedSuggestionsViewer
-				id={userData?.[0]?.id}
+				userId={userData?.[0]?.id}
 				initialSuggestions={suggestions}
 				loadAdditional={suggestions.length === 30}
 				isFood

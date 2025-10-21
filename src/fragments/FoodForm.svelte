@@ -8,7 +8,7 @@
 	let notification = $state<Notification | undefined>();
 </script>
 
-<div class="modal modal-bottom" id="submit" role="dialog">
+<div class="modal modal-bottom t" id="submit" role="dialog">
 	<div class="modal-box">
 		<div class="flex place-content-between place-items-center">
 			<h1 class="font-semibold text-3xl">Suggest New Food Item</h1>
@@ -92,3 +92,25 @@
 		</form>
 	</div>
 </div>
+
+<style global>
+	@media (min-width: 768px) {
+		.t {
+			place-items: center;
+		}
+		.t :where(.modal-box) {
+			width: 91.666667%;
+			max-width: 32rem; /* 512px */
+			--un-translate-y: 0px;
+			--un-scale-x: 0.9;
+			--un-scale-y: 0.9;
+			transform: translate(var(--un-translate-x), var(--un-translate-y))
+				rotate(var(--un-rotate)) skewX(var(--un-skew-x)) skewY(var(--un-skew-y))
+				scaleX(var(--un-scale-x)) scaleY(var(--un-scale-y));
+			border-top-left-radius: var(--rounded-box, 1rem);
+			border-top-right-radius: var(--rounded-box, 1rem);
+			border-bottom-left-radius: var(--rounded-box, 1rem);
+			border-bottom-right-radius: var(--rounded-box, 1rem);
+		}
+	}
+</style>

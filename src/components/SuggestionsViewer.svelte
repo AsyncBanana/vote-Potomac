@@ -72,15 +72,17 @@
 					: undefined
 			: undefined}
 		metadata={suggestion.metadata}
+		{userId}
 	/>
 {/each}
 {#if loadAdditional}
 	<Button
-		on:click={() => {
+		onclick={async () => {
 			offset += 30;
-			loadSuggestions();
+			await loadSuggestions();
 		}}
-	></Button>
+		type="tertiary">Load More Suggestions</Button
+	>
 {/if}
 {#if notice}
 	<p>{notice}</p>

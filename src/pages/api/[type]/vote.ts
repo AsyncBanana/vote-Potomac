@@ -71,7 +71,7 @@ export const POST: APIRoute = async (ctx) => {
 					.where(eq(contentTable.id, contentId))}`,
 			),
 	]);
-	if (res && authorData.voteNotifications) {
+	if (res && authorData.voteNotifications && import.meta.env.PROD) {
 		ctx.locals.runtime.ctx.waitUntil(
 			sendEmail(
 				{

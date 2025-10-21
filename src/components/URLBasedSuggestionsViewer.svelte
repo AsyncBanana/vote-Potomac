@@ -17,10 +17,11 @@
 	let suggestions = $state(initialSuggestions) as SuggestionPreview[];
 	$effect(() => {
 		const queryParams = new URLSearchParams();
-		if (queryConfig().query) queryParams.append("q", queryConfig().query);
-		if (queryConfig().sort) queryParams.append("sort", queryConfig().sort);
-		if (queryConfig().foodLocation)
-			queryParams.append("location", queryConfig().foodLocation);
+		const config = queryConfig();
+		if (config.query) queryParams.append("q", config.query);
+		if (config.sort) queryParams.append("sort", config.sort);
+		if (config.foodLocation)
+			queryParams.append("location", config.foodLocation);
 		const curPath = new URL(window.location.href);
 		curPath.search = queryParams.size > 0 ? queryParams.toString() : "";
 		history.pushState("", "", curPath);
