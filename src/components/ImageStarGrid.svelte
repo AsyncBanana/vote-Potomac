@@ -6,9 +6,9 @@
 	}
 	let { items }: Props = $props();
 	const colors = [
-		"linear-gradient(270deg,rgba(255, 106, 0, 1) 0%,rgba(255, 152, 79, 1) 100%)",
-		"linear-gradient(0deg,hsl(208 100% 50%), hsl(208 50% 50%)",
-		"linear-gradient(0deg,hsl(300 100% 50%), hsl(300 50% 50%)",
+		"linear-gradient(0deg,hsl(0 100% 50%), hsl(0 70% 50%));",
+		"linear-gradient(0deg,hsl(208 100% 50%), hsl(208 70% 50%)",
+		"linear-gradient(0deg,hsl(300 100% 50%), hsl(300 70% 50%)",
 	];
 </script>
 

@@ -7,6 +7,8 @@ import { drizzle } from "drizzle-orm/libsql";
 import { Suggestions } from "./src/schemas/suggestion.ts";
 import { config } from "dotenv";
 import { ContentStatus } from "./src/types/SharedContent.ts";
+import { parseArgs } from "node:util";
+import { argv } from "node:process";
 const { parsed: env } = config({
 	path:
 		process.env.TARGET_ENV === "IS"
@@ -22,6 +24,16 @@ const client = drizzle(
 		authToken: env.DATABASE_SECRET,
 	}),
 );
+const args = parseArgs({
+	args: argv,
+	options: {
+		// Useful for running migrations because Drizzle can't handle the FTS tables, messing up everything else
+		deleteonly: {
+			type: "boolean",
+		},
+	},
+	allowPositionals: true,
+});
 const INSERT_NEW_SUGGESTION_QUERY = sql.raw(
 	`INSERT INTO suggestions_fts (rowid, title, downvotes, votes, voteCount) VALUES (new.id, new.title, new.downvotes, new.votes, new.voteCount);`,
 );
@@ -83,7 +95,8 @@ await client.transaction(async (tx) => {
 	await tx.run(sql`DROP TRIGGER IF EXISTS suggestions_ad`);
 	await tx.run(sql`DROP TRIGGER IF EXISTS suggestions_au`);
 	await tx.run(sql`DROP TABLE IF EXISTS suggestions_fts`);
-	await tx.run(sql`CREATE VIRTUAL TABLE IF NOT EXISTS suggestions_fts USING fts5(
+	if (!args.values.deleteonly) {
+		await tx.run(sql`CREATE VIRTUAL TABLE IF NOT EXISTS suggestions_fts USING fts5(
 		id,
 		title,
 		votes UNINDEXED,
@@ -92,10 +105,11 @@ await client.transaction(async (tx) => {
 		content='suggestions',
 		content_rowid='id'
 	)`);
-	for (let [name, trigger] of Object.entries(triggers)) {
-		await tx.run(sql`CREATE TRIGGER IF NOT EXISTS ${sql.raw(`__suggestion_fts_` + name)} AFTER ${sql.raw(trigger.type)} ON ${Suggestions}${sql.raw(trigger.condition ? ` WHEN ${trigger.condition?.toQuery({ inlineParams: true }).sql}` : "")}
+		for (let [name, trigger] of Object.entries(triggers)) {
+			await tx.run(sql`CREATE TRIGGER IF NOT EXISTS ${sql.raw(`__suggestion_fts_` + name)} AFTER ${sql.raw(trigger.type)} ON ${Suggestions}${sql.raw(trigger.condition ? ` WHEN ${trigger.condition?.toQuery({ inlineParams: true }).sql}` : "")}
 BEGIN
 	${trigger.update}
 END;`);
+		}
 	}
 });

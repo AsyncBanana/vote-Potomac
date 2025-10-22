@@ -21,18 +21,20 @@
 	let offset = $state(0);
 	async function loadSuggestions(keep: boolean = true) {
 		const res = await fetch(
-			`/api/suggestions?offset=${offset}&sort=${queryConfig?.sort || "top"}${queryConfig?.foodLocation ? `&location=${queryConfig.foodLocation}` : ""}${queryConfig.isFood ? "&food" : ""}`,
+			`/api/suggestions?offset=${offset}&sort=${queryConfig?.sort || "top"}${queryConfig?.foodLocation ? `&location=${queryConfig.foodLocation}` : ""}${queryConfig.isFood ? "&food" : ""}${queryConfig?.query ? `&q=${queryConfig.query}` : ""}`,
 		);
 		if (res.status === 404) {
-			notice = "No more suggestions found :(";
+			notice = "No suggestions found :(";
 			loadAdditional = false;
+			if (!keep) suggestions = [];
 			return;
 		}
 		if (!res.ok) {
-			notice = "Error loading more suggestions :(";
+			notice = "Error loading suggestions :(";
 			loadAdditional = false;
 			return;
 		}
+		notice = "";
 		loadAdditional = true;
 		const newSuggestions = (await res.json()) as SuggestionPreview[];
 		loadAdditional = newSuggestions.length > 29;

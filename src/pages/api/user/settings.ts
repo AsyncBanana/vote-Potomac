@@ -16,8 +16,8 @@ export const POST: APIRoute = async (ctx) => {
 			moderationNotifications: body.get("moderationNotifications") === "on",
 			voteNotifications: body.get("voteNotifications") === "on",
 			replyNotifications: body.get("replyNotifications") === "on",
+			milestoneNotifications: body.get("milestoneNotifications") === "on",
 		})
 		.where(eq(Users.id, session.id));
-	console.log(res);
 	return ctx.redirect("/settings");
 };

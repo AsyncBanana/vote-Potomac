@@ -8,6 +8,7 @@ const { parsed: env } = config({
 				? "./.env.production"
 				: "./.env.development",
 });
+
 /** @type { import("drizzle-kit").Config } */
 export default {
 	schema: "./src/schemas/!(fts)*.ts",

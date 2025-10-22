@@ -64,6 +64,17 @@ const {
 				checked={userData.voteNotifications ? true : undefined}
 			/>
 		</label>
+		<label class="label cursor-pointer flex gap-3">
+			<span class="label-text"
+				>When you reach a certain milestone number of votes</span
+			>
+			<input
+				type="checkbox"
+				class="toggle toggle-success"
+				name="milestoneNotifications"
+				checked={userData.milestoneNotifications ? true : undefined}
+			/>
+		</label>
 		<Button class="w-max" action="submit">Save</Button>
 	</form>
 </AppLayout>

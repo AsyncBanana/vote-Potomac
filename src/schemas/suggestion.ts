@@ -49,7 +49,7 @@ export const Suggestions = sqliteTable(
 		description: text("description"),
 		votes: CSVArray("votes").default([]),
 		downvotes: CSVArray("downvotes").default([]),
-		metadata: blob("metadata", { mode: "json" }).$type<SuggestionMetadata>(),
+		metadata: text("metadata", { mode: "json" }).$type<SuggestionMetadata>(),
 	},
 	(table) => {
 		return {

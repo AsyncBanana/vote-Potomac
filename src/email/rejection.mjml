@@ -27,7 +27,7 @@
 			<mj-column>
 				<mj-divider border-color="#ff6a00"></mj-divider>
 				<mj-text font-size="18px"
-					>Your suggestion "{{title}}" has been rejected</mj-text
+					>Your suggestion "{{ title }}" has been rejected</mj-text
 				>
 				<mj-text font-size="18px"
 					>Please review the rules or contact an SGA member or other admin if
@@ -48,7 +48,8 @@
 				>
 				<mj-text font-family="helvetica" padding-bottom="0px"
 					><a href="https://votepotomac.com/settings"
-						>Manage Notification Settings</a
+						>Want to stop receiving these notifications? Manage Notification
+						Settings</a
 					></mj-text
 				>
 			</mj-column>

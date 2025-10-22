@@ -21,7 +21,7 @@ export default defineConfig({
 		};
 	},
 	presets: [
-		presetWind3({ dark: "class" }),
+		presetWind3({ dark: { dark: ".nonexistent" } }),
 		presetIcons(),
 		presetWebFonts({
 			fonts: {
@@ -39,14 +39,14 @@ export default defineConfig({
 						secondary: "hsl(208 100% 32%)",
 					},
 				},
-				{
+				/*{
 					dark: {
 						...themes["[data-theme=dark]"],
 						primary: "hsl(25 100% 50%)",
 						"primary-content": "white",
 						secondary: "hsl(208 100% 32%)",
 					},
-				},
+				},*/
 			],
 		}),
 	],

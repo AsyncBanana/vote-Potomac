@@ -1,6 +1,6 @@
 <mjml>
 	<mj-head>
-		<mj-title>Your {{ type }} has been voted for</mj-title>
+		<mj-title>Your {{ type }} has reached {{ votes }} votes!</mj-title>
 		<mj-font
 			name="Inter"
 			href="https://fonts.googleapis.com/css?family=Inter"
@@ -27,7 +27,7 @@
 			<mj-column>
 				<mj-divider border-color="#ff6a00"></mj-divider>
 				<mj-text font-size="18px">{{ message }}</mj-text>
-				<mj-text font-size="18px">It currently has {{ votes }} votes</mj-text>
+				<mj-text font-size="18px">¯\_(ツ)_/¯</mj-text>
 			</mj-column>
 		</mj-section>
 		<mj-section>

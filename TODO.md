@@ -1,5 +1,0 @@
-- Finish converting index.astro
-  - Add search live functionality
-- Add voting on summary page
-- Clean up food landing page
-- Test

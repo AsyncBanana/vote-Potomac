@@ -25,7 +25,10 @@ export const POST: APIRoute = async (ctx) => {
 					and(eq(contentTable.id, id), eq(Users.id, contentTable.author)),
 				),
 
-			ctx.locals.db.update(contentTable).set({ status: ContentStatus.Archive }),
+			ctx.locals.db
+				.update(contentTable)
+				.set({ status: ContentStatus.Archive })
+				.where(eq(contentTable.id, id)),
 		]);
 		if (user.moderationNotifications && import.meta.env.PROD) {
 			ctx.locals.runtime.ctx.waitUntil(
@@ -53,7 +56,10 @@ export const POST: APIRoute = async (ctx) => {
 					and(eq(contentTable.id, id), eq(Users.id, contentTable.author)),
 				),
 
-			ctx.locals.db.update(contentTable).set({ status: ContentStatus.Active }),
+			ctx.locals.db
+				.update(contentTable)
+				.set({ status: ContentStatus.Active })
+				.where(eq(contentTable.id, id)),
 		]);
 		if (user.moderationNotifications && import.meta.env.PROD) {
 			ctx.locals.runtime.ctx.waitUntil(

@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import Button from "../components/Button.svelte";
 import { notifications } from "../modules/notification";
 import URLBasedSuggestionsViewer from "../components/URLBasedSuggestionsViewer.svelte";
+import Search from "../components/Search.svelte";
 import getSuggestions, {
 	type QuestionQueryConfig,
 } from "../modules/getSuggestions.ts";
@@ -68,18 +69,7 @@ if (notification) {
 				</div>
 			)
 		}
-		<div
-			class="input input-bordered w-full flex align-middle items-center gap-3"
-		>
-			<div class="i-material-symbols:search h-6 w-6"></div>
-			<input
-				type="search"
-				placeholder="Search for suggestions..."
-				class="bg-transparent h-full grow"
-				id="suggestionSearch"
-				value={query}
-			/>
-		</div>
+		<Search client:load />
 		<select class="select select-bordered w-max" id="sort">
 			<option selected={sortOrder === "recent"} value="recent"
 				>Most recent</option
@@ -97,6 +87,7 @@ if (notification) {
 					isFood: false,
 					query,
 				} satisfies QuestionQueryConfig}
+				client:load
 			/>
 		</div>
 	</div>

@@ -1,3 +1,4 @@
+import { boolean } from "drizzle-orm/gel-core";
 import { index, integer } from "drizzle-orm/sqlite-core";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const enum UserRole {
@@ -31,6 +32,9 @@ export const Users = sqliteTable(
 		voteNotifications: integer("voteNotifications", {
 			mode: "boolean",
 		}).default(false),
+		milestoneNotifications: integer("milestoneNotifications", {
+			mode: "boolean",
+		}).default(true),
 	},
 	(table) => {
 		return {
