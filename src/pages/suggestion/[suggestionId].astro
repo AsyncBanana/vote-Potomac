@@ -10,6 +10,7 @@ import { extractDendrite } from "../../modules/dendrite";
 import Textarea from "../../components/Textarea.astro";
 import { Comments } from "../../schemas/comment";
 import { ContentStatus } from "../../types/SharedContent";
+import VoteCounter from "../../components/VoteCounter.svelte";
 const id = Astro.params.suggestionId;
 
 let userId: string | undefined;
@@ -76,35 +77,17 @@ if (res.type === "error") return res.data;
 	title={`${suggestion.title.length > 45 ? suggestion.title.substring(0, 45) + "..." : suggestion.title} | Vote! Potomac`}
 >
 	<header class="flex flex-row gap-3 grow place-items-center">
-		<div class="grid grid-rows-2 gap-1">
-			<Button
-				type={userId && suggestion.votes?.includes(userId)
-					? "primary"
-					: "tertiary"}
-				class="vote-btn h-8 min-h-8"
-				square={false}
-				icon="i-bx:upvote"
-				id={`vote-suggestion-${suggestion.id}-up`}
-				vertical
-				ariaLabel="Vote for suggestion"
-				disabled={suggestion.status !== ContentStatus.Active}
-			/>
-			<Button
-				type={userId && suggestion.downvotes?.includes(userId)
-					? "primary"
-					: "tertiary"}
-				class="vote-btn h-8 min-h-8"
-				icon="i-bx:downvote"
-				square={false}
-				id={`vote-suggestion-${suggestion.id}-down`}
-				vertical
-				ariaLabel="Vote against suggestion"
-				disabled={suggestion.status !== ContentStatus.Active}
-			/>
-		</div>
-		<div class="text-3xl font-bold" id={`text-suggestion-${suggestion.id}`}>
-			{suggestion.voteCount || 0}
-		</div>
+		<VoteCounter
+			client:load
+			{userId}
+			suggestionId={id}
+			votes={suggestion.voteCount}
+			vote={userId && suggestion.votes?.includes(userId)
+				? "up"
+				: userId && suggestion.downvotes?.includes(userId)
+					? "down"
+					: undefined}
+		/>
 		<div>
 			<h1 class="text-3xl font-bold text-balance">
 				{suggestion.title}
