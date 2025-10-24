@@ -16,7 +16,7 @@
 <div class="modal modal-bottom t" id="submit" role="dialog">
 	<div class="modal-box">
 		<div class="flex place-content-between place-items-center">
-			<h1 class="font-semibold text-3xl">Suggest New Food Item</h1>
+			<h1 class="font-semibold text-3xl">Suggest New Food Or Drink</h1>
 			<Button icon="i-ic:round-close" type="tertiary" href="#" />
 		</div>
 		<form
