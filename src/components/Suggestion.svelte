@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { extractDendrite } from "../modules/dendrite";
 	import { FoodLocation, type SuggestionMetadata } from "../schemas/suggestion";
 	import VoteCounter from "./VoteCounter.svelte";
 	interface Props {
@@ -37,6 +38,12 @@
 		<span class="col-span-4 text-xl align-middle font-bold underline">
 			{title}
 		</span>
+		<div class="text-md font-medium opacity-80">
+			{extractDendrite(id).toLocaleString("en-US", {
+				timeZone: "America/New_York",
+				dateStyle: "short",
+			})}
+		</div>
 		{#if metadata?.locations}
 			<div class="flex place-items-center gap-3 h-12">
 				{#each metadata.locations as loc}

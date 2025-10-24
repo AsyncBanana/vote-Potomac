@@ -42,7 +42,7 @@ interface ImportMetaEnv {
 	readonly GOOGLE_OAUTH_SECRET: string;
 	readonly AUTH_SECRET: string | { alg: "HS256"; kty: string; k: string };
 	readonly RESEND_KEY: string;
-	readonly EPOCH: number;
+	readonly PUBLIC_EPOCH: number;
 	readonly ORGANIZATION?: string;
 }
 interface ImportMeta {

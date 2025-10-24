@@ -6,7 +6,7 @@
 export function generateDendrite(timestamp?: number) {
 	// optimize creation using arraybuffer?
 	const sec = Math.floor(
-		((timestamp || Date.now()) - import.meta.env.EPOCH) / 1000,
+		((timestamp || Date.now()) - import.meta.env.PUBLIC_EPOCH) / 1000,
 	);
 	let dendrite = sec.toString(2);
 	dendrite = dendrite.padStart(32, "0");
@@ -20,7 +20,7 @@ export function extractDendrite(dendrite: number) {
 	const strDendrite = dendrite.toString(2);
 	const timestamp = new Date(
 		parseInt(strDendrite.substring(0, strDendrite.length - 20), 2) * 1000 +
-			+import.meta.env.EPOCH,
+			+import.meta.env.PUBLIC_EPOCH,
 	);
 	return timestamp;
 }

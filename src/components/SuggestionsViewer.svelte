@@ -55,10 +55,17 @@
 		}
 		loadSuggestions(false);
 	});
+
 	const queryConfig = $derived({
 		...partialQueryConfig(),
 		isFood: isFood,
 	});
+	if (typeof addEventListener !== "undefined") {
+		addEventListener("suggestionPosted", (e: CustomEvent) => {
+			suggestions.unshift(e.detail);
+			suggestions = suggestions;
+		});
+	}
 </script>
 
 {#each suggestions as suggestion}

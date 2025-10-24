@@ -6,7 +6,7 @@ import { ContentStatus } from "../types/SharedContent";
 export const Comments = sqliteTable(
 	"comments",
 	{
-		id: integer("id").primaryKey(),
+		id: integer("id").primaryKey().$defaultFn(generateDendrite),
 		parentId: integer("parentId")
 			.references(() => Suggestions.id, { onDelete: "cascade" })
 			.notNull(),

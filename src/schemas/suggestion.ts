@@ -8,6 +8,7 @@ import {
 } from "drizzle-orm/sqlite-core";
 import { sql, type SQL } from "drizzle-orm";
 import { ContentStatus } from "../types/SharedContent";
+import { generateDendrite } from "../modules/dendrite";
 export const CSVArray = customType<{
 	data: string[];
 	driverData: string;
@@ -35,7 +36,7 @@ export interface SuggestionMetadata {
 export const Suggestions = sqliteTable(
 	"suggestions",
 	{
-		id: integer("id").primaryKey(),
+		id: integer("id").primaryKey().$defaultFn(generateDendrite),
 		voteCount: integer("voteCount").generatedAlwaysAs(
 			(): SQL =>
 				sql`length(${Suggestions.votes})-length(replace(${Suggestions.votes}, ',', ''))-length(${Suggestions.downvotes})+length(replace(${Suggestions.downvotes}, ',', ''))`,

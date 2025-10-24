@@ -1,10 +1,15 @@
 <script lang="ts">
 	import clsx from "clsx";
 	import Button from "../components/Button.svelte";
+	import { FoodLocation } from "../schemas/suggestion";
 	interface Notification {
 		type: "error" | "info";
 		message: string;
 	}
+	interface Props {
+		userId?: string;
+	}
+	let { userId }: Props = $props();
 	let notification = $state<Notification | undefined>();
 </script>
 
@@ -23,14 +28,32 @@
 				if (!(e.target as HTMLFormElement).reportValidity()) {
 					return;
 				}
+				const data = new FormData(e.target as HTMLFormElement);
+
 				e.preventDefault();
 				const res = await fetch("/api/suggestion?type=food&live", {
 					method: "POST",
-					body: new FormData(e.target as HTMLFormElement),
+					body: data,
 				});
 				if (res.ok) {
-					(e.target as HTMLFormElement).reset();
 					notification = { type: "info", message: "Suggestion Posted!" };
+					dispatchEvent(
+						new CustomEvent("suggestionPosted", {
+							detail: {
+								id: +(await res.text()),
+								voteCount: 1,
+								votes: [userId],
+								downvotes: [],
+								title: data.get("title"),
+								metadata: {
+									locations: Object.keys(FoodLocation)
+										.filter((v) => data.has(v))
+										.map((v) => FoodLocation[v as keyof typeof FoodLocation]),
+								},
+							},
+						}),
+					);
+					(e.target as HTMLFormElement).reset();
 				} else {
 					notification = {
 						type: "error",
@@ -91,6 +114,7 @@
 			{/if}
 		</form>
 	</div>
+	<a href="#" class="modal-backdrop cursor-default">Close</a>
 </div>
 
 <style global>
